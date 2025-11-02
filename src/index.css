@@ -55,6 +55,32 @@ All colors MUST be HSL.
     /* Transitions */
     --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-mystical: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    
+    /* Category Specific Colors - Based on Five Elements */
+    /* 事业运势 - Metal Element (Gold/White) */
+    --career-primary: 43 85% 55%;
+    --career-secondary: 45 90% 65%;
+    --career-bg: 45 30% 15%;
+    
+    /* 情感婚姻 - Water Element (Pink/Peach) */
+    --love-primary: 350 70% 60%;
+    --love-secondary: 340 80% 70%;
+    --love-bg: 350 25% 15%;
+    
+    /* 健康养生 - Wood Element (Green) */
+    --health-primary: 140 60% 50%;
+    --health-secondary: 150 70% 60%;
+    --health-bg: 140 25% 15%;
+    
+    /* 风水布局 - Earth Element (Brown/Yellow) */
+    --fengshui-primary: 35 70% 50%;
+    --fengshui-secondary: 40 80% 60%;
+    --fengshui-bg: 35 25% 15%;
+    
+    /* 综合占卜 - Cosmic Element (Purple/Violet) */
+    --general-primary: 270 60% 55%;
+    --general-secondary: 280 70% 65%;
+    --general-bg: 270 25% 15%;
   }
 }
 
