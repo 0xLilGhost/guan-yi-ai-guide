@@ -41,10 +41,10 @@ const categories = [
 
 const CategoryGrid = () => {
   return (
-    <section className="relative px-6 py-20">
+    <section className="relative px-6 py-32">
       <div className="max-w-7xl mx-auto">
         {/* Section header */}
-        <div className="text-center mb-16 space-y-4">
+        <div className="text-center mb-24 space-y-4">
           <h2 className="text-4xl md:text-5xl font-bold text-accent">
             选择咨询类别
           </h2>
@@ -53,11 +53,34 @@ const CategoryGrid = () => {
           </p>
         </div>
 
-        {/* Category grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-          {categories.map((category, index) => (
-            <CategoryCard key={index} {...category} index={index} />
-          ))}
+        {/* Circular category layout */}
+        <div className="relative w-full max-w-4xl mx-auto aspect-square">
+          {/* Center decoration */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full bg-accent/10 border-2 border-accent/30 flex items-center justify-center">
+            <div className="text-accent text-4xl font-bold">易</div>
+          </div>
+
+          {/* Categories arranged in circle */}
+          {categories.map((category, index) => {
+            const angle = (index * 72 - 90) * (Math.PI / 180); // 72 degrees apart, starting from top
+            const radius = 45; // percentage of container
+            const x = 50 + radius * Math.cos(angle);
+            const y = 50 + radius * Math.sin(angle);
+            
+            return (
+              <div
+                key={index}
+                className="absolute w-56"
+                style={{
+                  left: `${x}%`,
+                  top: `${y}%`,
+                  transform: 'translate(-50%, -50%)',
+                }}
+              >
+                <CategoryCard {...category} index={index} />
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>
