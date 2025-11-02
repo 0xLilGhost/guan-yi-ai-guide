@@ -1,4 +1,5 @@
 import { LucideIcon } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
@@ -19,8 +20,15 @@ const CategoryCard = ({
   gradient,
   index,
 }: CategoryCardProps) => {
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    navigate('/inquiry', { state: { category: title } });
+  };
+
   return (
     <Card
+      onClick={handleClick}
       className={cn(
         "group relative overflow-hidden border-border/50 bg-card/80 backdrop-blur-sm",
         "hover:border-accent/50 hover:shadow-gold-glow transition-mystical cursor-pointer",
