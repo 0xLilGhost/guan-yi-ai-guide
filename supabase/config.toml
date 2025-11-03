@@ -2,3 +2,6 @@ project_id = "mnzynxvonkmrwgvkgpxw"
 
 [functions.divination]
 verify_jwt = false
+
+[functions.generate-guardian-card]
+verify_jwt = false

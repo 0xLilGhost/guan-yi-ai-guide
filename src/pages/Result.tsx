@@ -1,12 +1,38 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft, Home, Sparkles } from "lucide-react";
+import { ArrowLeft, Home, Sparkles, Wand2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useState } from "react";
+import { toast } from "sonner";
 
 const Result = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { result, category, question } = location.state || {};
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [guardianCard, setGuardianCard] = useState<string | null>(null);
+
+  const handleGenerateCard = async () => {
+    setIsGenerating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-guardian-card', {
+        body: { category, result, question }
+      });
+
+      if (error) throw error;
+
+      if (data?.imageUrl) {
+        setGuardianCard(data.imageUrl);
+        toast.success('守护牌生成成功！');
+      }
+    } catch (error) {
+      console.error('Error generating guardian card:', error);
+      toast.error('生成守护牌失败，请稍后重试');
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   if (!result) {
     return (
@@ -123,6 +149,59 @@ const Result = () => {
             </Card>
           )}
         </div>
+
+        {/* Guardian Card Generation */}
+        <Card className="p-8 bg-card/80 backdrop-blur-sm border-accent/20">
+          <div className="text-center space-y-6">
+            <div className="space-y-2">
+              <h2 className="text-2xl font-bold text-accent">专属守护牌</h2>
+              <p className="text-muted-foreground">根据您的占卜结果生成独一无二的AI守护牌</p>
+            </div>
+            
+            {!guardianCard ? (
+              <Button
+                onClick={handleGenerateCard}
+                disabled={isGenerating}
+                className="bg-gradient-to-r from-accent to-accent/80 hover:from-accent/90 hover:to-accent/70 text-accent-foreground font-bold py-6 px-8 text-lg"
+              >
+                <Wand2 className="w-5 h-5 mr-2" />
+                {isGenerating ? '正在生成守护牌...' : '生成专属守护牌'}
+              </Button>
+            ) : (
+              <div className="space-y-4">
+                <div className="relative max-w-sm mx-auto aspect-[2/3] rounded-lg overflow-hidden shadow-gold-glow border-2 border-accent/30">
+                  <img 
+                    src={guardianCard} 
+                    alt="守护牌" 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="flex gap-4 justify-center">
+                  <Button
+                    onClick={handleGenerateCard}
+                    disabled={isGenerating}
+                    variant="outline"
+                    className="border-accent/30 text-accent hover:bg-accent/10"
+                  >
+                    <Wand2 className="w-4 h-4 mr-2" />
+                    重新生成
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      const link = document.createElement('a');
+                      link.href = guardianCard;
+                      link.download = `守护牌-${category}.png`;
+                      link.click();
+                    }}
+                    className="bg-accent hover:bg-accent/90 text-accent-foreground"
+                  >
+                    下载守护牌
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        </Card>
 
         {/* Actions */}
         <div className="flex flex-col sm:flex-row gap-4">
