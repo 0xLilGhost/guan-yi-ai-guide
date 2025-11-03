@@ -1,10 +1,8 @@
-import { LucideIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 interface CategoryCardProps {
-  icon: LucideIcon;
   title: string;
   subtitle: string;
   description: string;
@@ -13,7 +11,6 @@ interface CategoryCardProps {
 }
 
 const CategoryCard = ({
-  icon: Icon,
   title,
   subtitle,
   description,
@@ -48,8 +45,8 @@ const CategoryCard = ({
       <div className="relative p-8 space-y-6">
         {/* Icon */}
         <div className="flex items-center justify-between">
-          <div className="p-4 rounded-full bg-accent/10 group-hover:bg-accent/20 transition-mystical">
-            <Icon className="w-8 h-8 text-accent" />
+          <div className="w-16 h-16 rounded-full bg-accent/10 group-hover:bg-accent/20 transition-mystical flex items-center justify-center border-2 border-accent/30 group-hover:border-accent/50">
+            <span className="text-3xl font-bold text-accent">易</span>
           </div>
           <div className="text-accent/30 text-6xl font-bold group-hover:text-accent/50 transition-mystical">
             {index + 1}
