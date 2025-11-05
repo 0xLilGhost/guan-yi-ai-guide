@@ -72,6 +72,9 @@ const Inquiry = () => {
   const CategoryIcon = categoryStyle.icon;
   
   const [isLoading, setIsLoading] = useState(false);
+  const [divineMethod, setDivineMethod] = useState<'time' | 'number'>('time');
+  const [number1, setNumber1] = useState('');
+  const [number2, setNumber2] = useState('');
   const [formData, setFormData] = useState({
     question: "",
     birthYear: "",
@@ -106,6 +109,11 @@ const Inquiry = () => {
             day: formData.birthDay,
             hour: formData.birthHour,
             gender: formData.gender,
+          },
+          divineData: {
+            method: divineMethod,
+            number1: number1 ? parseInt(number1) : undefined,
+            number2: number2 ? parseInt(number2) : undefined
           }
         }
       });
@@ -307,6 +315,80 @@ const Inquiry = () => {
                 </div>
               </div>
             </div>
+
+            {/* 起卦方式 - 仅在梅花易数或综合占卜时显示 */}
+            {(categoryTitle === '梅花易数' || categoryTitle === '综合占卜') && (
+              <div className="space-y-4 p-6 rounded-lg bg-background/30 backdrop-blur-sm border"
+                style={{ borderColor: `${categoryStyle.primaryColor}20` }}
+              >
+                <Label 
+                  className="text-lg font-semibold"
+                  style={{ color: categoryStyle.primaryColor }}
+                >
+                  起卦方式
+                </Label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setDivineMethod('time')}
+                    className={`px-4 py-3 rounded-xl border transition-all ${
+                      divineMethod === 'time'
+                        ? 'bg-background/40 border-primary/60 ring-2 ring-primary/20'
+                        : 'bg-background/20 border-primary/20 hover:bg-background/30'
+                    }`}
+                  >
+                    <span className="font-medium">时间起卦</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDivineMethod('number')}
+                    className={`px-4 py-3 rounded-xl border transition-all ${
+                      divineMethod === 'number'
+                        ? 'bg-background/40 border-primary/60 ring-2 ring-primary/20'
+                        : 'bg-background/20 border-primary/20 hover:bg-background/30'
+                    }`}
+                  >
+                    <span className="font-medium">数字起卦</span>
+                  </button>
+                </div>
+
+                {divineMethod === 'number' && (
+                  <div className="grid grid-cols-2 gap-3 mt-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="num1">上卦数</Label>
+                      <Input
+                        id="num1"
+                        type="number"
+                        min="1"
+                        value={number1}
+                        onChange={(e) => setNumber1(e.target.value)}
+                        placeholder="任意正整数"
+                        className="bg-background/50"
+                        style={{ borderColor: `${categoryStyle.primaryColor}30` }}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="num2">下卦数</Label>
+                      <Input
+                        id="num2"
+                        type="number"
+                        min="1"
+                        value={number2}
+                        onChange={(e) => setNumber2(e.target.value)}
+                        placeholder="任意正整数"
+                        className="bg-background/50"
+                        style={{ borderColor: `${categoryStyle.primaryColor}30` }}
+                      />
+                    </div>
+                  </div>
+                )}
+                <p className="text-sm text-foreground/70 mt-2">
+                  {divineMethod === 'time' 
+                    ? '将使用您提供的出生时间或当前时间自动起卦' 
+                    : '请输入两个数字，系统将自动计算卦象'}
+                </p>
+              </div>
+            )}
 
             {/* Submit Button */}
             <Button

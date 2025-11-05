@@ -13,6 +13,11 @@ interface DivinationRequest {
     hour?: string;
     gender?: string;
   };
+  divineData?: {
+    method?: 'time' | 'number';
+    number1?: number;
+    number2?: number;
+  };
 }
 
 Deno.serve(async (req) => {
@@ -21,14 +26,80 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { category, question, birthData }: DivinationRequest = await req.json();
+    const { category, question, birthData, divineData }: DivinationRequest = await req.json();
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
 
     if (!LOVABLE_API_KEY) {
       throw new Error('LOVABLE_API_KEY not configured');
     }
 
-    console.log('Divination request:', { category, question, hasBirthData: !!birthData.year });
+    console.log('Divination request:', { category, question, hasBirthData: !!birthData.year, divineMethod: divineData?.method });
+
+    // 计算真实的梅花易数卦象
+    const calculateHexagram = () => {
+      const trigrams = ['乾', '兑', '离', '震', '巽', '坎', '艮', '坤'];
+      let upperNum: number, lowerNum: number, changingLine: number;
+
+      if (divineData?.method === 'number' && divineData.number1 && divineData.number2) {
+        upperNum = ((divineData.number1 - 1) % 8) + 1;
+        lowerNum = ((divineData.number2 - 1) % 8) + 1;
+        changingLine = ((divineData.number1 + divineData.number2 - 1) % 6) + 1;
+      } else {
+        const now = new Date();
+        const year = birthData.year ? parseInt(birthData.year) : now.getFullYear();
+        const month = birthData.month ? parseInt(birthData.month) : now.getMonth() + 1;
+        const day = birthData.day ? parseInt(birthData.day) : now.getDate();
+        const hour = birthData.hour ? parseInt(birthData.hour) : now.getHours();
+        
+        upperNum = ((year + month + day - 1) % 8) + 1;
+        lowerNum = ((year + month + day + hour - 1) % 8) + 1;
+        changingLine = ((year + month + day + hour - 1) % 6) + 1;
+      }
+
+      const upperTrigram = trigrams[upperNum - 1];
+      const lowerTrigram = trigrams[lowerNum - 1];
+      
+      // 计算变卦
+      const resultUpperNum = changingLine <= 3 ? ((lowerNum % 8) + 1) : upperNum;
+      const resultLowerNum = changingLine > 3 ? ((upperNum % 8) + 1) : lowerNum;
+      const resultTrigram = `${trigrams[resultUpperNum - 1]}${trigrams[resultLowerNum - 1]}`;
+
+      return {
+        upper: upperTrigram,
+        lower: lowerTrigram,
+        changing: changingLine,
+        result: resultTrigram,
+        interpretation: `本卦${upperTrigram}上${lowerTrigram}下，第${changingLine}爻动，变为${resultTrigram}卦`
+      };
+    };
+
+    // 计算奇门遁甲盘局
+    const calculateQimen = () => {
+      const palaces = ['中宫', '乾宫', '坎宫', '艮宫', '震宫', '巽宫', '离宫', '坤宫', '兑宫'];
+      const gates = ['开门', '休门', '生门', '伤门', '杜门', '景门', '死门', '惊门'];
+      const stars = ['天蓬', '天任', '天冲', '天辅', '天英', '天芮', '天柱', '天心', '天禽'];
+      const directions = ['东方', '南方', '西方', '北方', '东南方', '西南方', '东北方', '西北方'];
+
+      const now = new Date();
+      const hour = birthData.hour ? parseInt(birthData.hour) : now.getHours();
+      const day = birthData.day ? parseInt(birthData.day) : now.getDate();
+      
+      const palaceIndex = (day + hour) % 9;
+      const gateIndex = (day * 2 + hour) % 8;
+      const starIndex = (day + hour * 3) % 9;
+      const directionIndex = (day + hour) % 8;
+
+      return {
+        palace: palaces[palaceIndex],
+        gate: gates[gateIndex],
+        star: stars[starIndex],
+        direction: `${directions[directionIndex]}大吉`,
+        timing: `当前时辰${gates[gateIndex]}当值，宜行动决策`
+      };
+    };
+
+    const hexagramData = (category === '梅花易数' || category === '综合占卜') ? calculateHexagram() : null;
+    const qimenData = (category === '奇门遁甲' || category === '综合占卜') && birthData.day ? calculateQimen() : null;
 
     // Build system prompt based on category
     const systemPrompts = {
@@ -87,6 +158,14 @@ Deno.serve(async (req) => {
       userPrompt += `（用户未提供生辰信息，请基于问题本身和通用规律进行分析）\n\n`;
     }
 
+    // 如果有真实计算的卦象和奇门数据，加入到用户提示中
+    if (hexagramData) {
+      userPrompt += `\n真实卦象数据：\n- 本卦：${hexagramData.upper}上${hexagramData.lower}下\n- 变爻：第${hexagramData.changing}爻\n- 变卦：${hexagramData.result}\n请基于此卦象进行解读。\n`;
+    }
+    if (qimenData) {
+      userPrompt += `\n真实奇门盘局：\n- 宫位：${qimenData.palace}\n- 值使门：${qimenData.gate}\n- 值符星：${qimenData.star}\n- 吉方：${qimenData.direction}\n请基于此盘局进行解读。\n`;
+    }
+
     userPrompt += `请按以下结构输出结果（使用JSON格式）：
 {
   "overview": "总体运势概述（2-3句话）",
@@ -102,25 +181,13 @@ Deno.serve(async (req) => {
     "bazi": ${birthData.year && birthData.month && birthData.day ? `{
       "year": { "heavenlyStem": "年干", "earthlyBranch": "年支", "element": "年柱五行" },
       "month": { "heavenlyStem": "月干", "earthlyBranch": "月支", "element": "月柱五行" },
-      "day": { "heavenlyStem": "日干", "heavenlyStem": "日支", "element": "日柱五行" },
+      "day": { "heavenlyStem": "日干", "earthlyBranch": "日支", "element": "日柱五行" },
       "hour": { "heavenlyStem": "时干", "earthlyBranch": "时支", "element": "时柱五行" },
       "dayMaster": "日主五行",
       "elementBalance": { "wood": 数值, "fire": 数值, "earth": 数值, "metal": 数值, "water": 数值 }
     }` : 'null'},
-    "hexagram": ${category === '梅花易数' || category === '综合占卜' ? `{
-      "upper": "上卦名称（乾坤震巽坎离艮兑之一）",
-      "lower": "下卦名称",
-      "changing": "变爻位置（1-6）",
-      "result": "变卦名称",
-      "interpretation": "卦象解读（100字以内）"
-    }` : 'null'},
-    "qimen": ${category === '奇门遁甲' || category === '综合占卜' ? `{
-      "palace": "当值宫位（中宫/乾宫/坎宫/艮宫/震宫/巽宫/离宫/坤宫/兑宫）",
-      "gate": "值使门（开休生伤杜景死惊）",
-      "star": "值符星（天蓬天任天冲天辅天英天芮天柱天心天禽）",
-      "direction": "吉方位（如：东南方大吉）",
-      "timing": "时机分析（100字以内）"
-    }` : 'null'},
+    "hexagram": ${hexagramData ? JSON.stringify(hexagramData) : 'null'},
+    "qimen": ${qimenData ? JSON.stringify(qimenData) : 'null'},
     "ziwei": ${(category === '情感婚姻' || category === '事业运势' || category === '综合占卜') && birthData.year ? `{
       "mainStar": "主星（紫微/天机/太阳/武曲/天同/廉贞等）",
       "palace": "命宫位置",
