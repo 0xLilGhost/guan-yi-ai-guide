@@ -11,6 +11,7 @@ interface DivinationRequest {
     month?: string;
     day?: string;
     hour?: string;
+    minute?: string;
     gender?: string;
   };
   divineData?: {
@@ -50,10 +51,11 @@ Deno.serve(async (req) => {
         const month = birthData.month ? parseInt(birthData.month) : now.getMonth() + 1;
         const day = birthData.day ? parseInt(birthData.day) : now.getDate();
         const hour = birthData.hour ? parseInt(birthData.hour) : now.getHours();
+        const minute = birthData.minute ? parseInt(birthData.minute) : now.getMinutes();
         
-        upperNum = ((year + month + day - 1) % 8) + 1;
-        lowerNum = ((year + month + day + hour - 1) % 8) + 1;
-        changingLine = ((year + month + day + hour - 1) % 6) + 1;
+        upperNum = ((year + month + day + minute - 1) % 8) + 1;
+        lowerNum = ((year + month + day + hour + minute - 1) % 8) + 1;
+        changingLine = ((year + month + day + hour + minute - 1) % 6) + 1;
       }
 
       const upperTrigram = trigrams[upperNum - 1];
@@ -82,12 +84,13 @@ Deno.serve(async (req) => {
 
       const now = new Date();
       const hour = birthData.hour ? parseInt(birthData.hour) : now.getHours();
+      const minute = birthData.minute ? parseInt(birthData.minute) : now.getMinutes();
       const day = birthData.day ? parseInt(birthData.day) : now.getDate();
       
-      const palaceIndex = (day + hour) % 9;
-      const gateIndex = (day * 2 + hour) % 8;
-      const starIndex = (day + hour * 3) % 9;
-      const directionIndex = (day + hour) % 8;
+      const palaceIndex = (day + hour + minute) % 9;
+      const gateIndex = (day * 2 + hour + minute) % 8;
+      const starIndex = (day + hour * 3 + minute) % 9;
+      const directionIndex = (day + hour + minute) % 8;
 
       return {
         palace: palaces[palaceIndex],
@@ -150,7 +153,11 @@ Deno.serve(async (req) => {
       userPrompt += `生辰信息：\n`;
       userPrompt += `- 出生日期：${birthData.year}年${birthData.month}月${birthData.day}日\n`;
       if (birthData.hour) {
-        userPrompt += `- 出生时辰：${birthData.hour}时\n`;
+        userPrompt += `- 出生时间：${birthData.hour}时`;
+        if (birthData.minute) {
+          userPrompt += `${birthData.minute}分`;
+        }
+        userPrompt += `\n`;
       }
       userPrompt += `- 性别：${birthData.gender === 'male' ? '男' : '女'}\n\n`;
       userPrompt += `请基于以上生辰信息进行精准分析。\n\n`;

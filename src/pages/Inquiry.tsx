@@ -81,6 +81,7 @@ const Inquiry = () => {
     birthMonth: "",
     birthDay: "",
     birthHour: "",
+    birthMinute: "",
     gender: "male",
   });
 
@@ -108,6 +109,7 @@ const Inquiry = () => {
             month: formData.birthMonth,
             day: formData.birthDay,
             hour: formData.birthHour,
+            minute: formData.birthMinute,
             gender: formData.gender,
           },
           divineData: {
@@ -227,7 +229,7 @@ const Inquiry = () => {
                 提供生辰八字可获得更精准的术数分析
               </p>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="year">年份</Label>
                   <Input
@@ -272,7 +274,7 @@ const Inquiry = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="hour">时辰</Label>
+                  <Label htmlFor="hour">时</Label>
                   <Input
                     id="hour"
                     type="number"
@@ -281,6 +283,21 @@ const Inquiry = () => {
                     max="23"
                     value={formData.birthHour}
                     onChange={(e) => setFormData({ ...formData, birthHour: e.target.value })}
+                    className="bg-background/50"
+                    style={{ borderColor: `${categoryStyle.primaryColor}30` }}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="minute">分</Label>
+                  <Input
+                    id="minute"
+                    type="number"
+                    placeholder="30"
+                    min="0"
+                    max="59"
+                    value={formData.birthMinute}
+                    onChange={(e) => setFormData({ ...formData, birthMinute: e.target.value })}
                     className="bg-background/50"
                     style={{ borderColor: `${categoryStyle.primaryColor}30` }}
                   />
