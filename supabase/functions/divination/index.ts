@@ -97,7 +97,50 @@ Deno.serve(async (req) => {
     "具体建议2",
     "具体建议3"
   ],
-  "probability": "准确度评估（如：参考度 75-80%）"
+  "probability": "准确度评估（如：参考度 75-80%）",
+  "visualData": {
+    "bazi": ${birthData.year && birthData.month && birthData.day ? `{
+      "year": { "heavenlyStem": "年干", "earthlyBranch": "年支", "element": "年柱五行" },
+      "month": { "heavenlyStem": "月干", "earthlyBranch": "月支", "element": "月柱五行" },
+      "day": { "heavenlyStem": "日干", "heavenlyStem": "日支", "element": "日柱五行" },
+      "hour": { "heavenlyStem": "时干", "earthlyBranch": "时支", "element": "时柱五行" },
+      "dayMaster": "日主五行",
+      "elementBalance": { "wood": 数值, "fire": 数值, "earth": 数值, "metal": 数值, "water": 数值 }
+    }` : 'null'},
+    "hexagram": ${category === '梅花易数' || category === '综合占卜' ? `{
+      "upper": "上卦名称（乾坤震巽坎离艮兑之一）",
+      "lower": "下卦名称",
+      "changing": "变爻位置（1-6）",
+      "result": "变卦名称",
+      "interpretation": "卦象解读（100字以内）"
+    }` : 'null'},
+    "qimen": ${category === '奇门遁甲' || category === '综合占卜' ? `{
+      "palace": "当值宫位（中宫/乾宫/坎宫/艮宫/震宫/巽宫/离宫/坤宫/兑宫）",
+      "gate": "值使门（开休生伤杜景死惊）",
+      "star": "值符星（天蓬天任天冲天辅天英天芮天柱天心天禽）",
+      "direction": "吉方位（如：东南方大吉）",
+      "timing": "时机分析（100字以内）"
+    }` : 'null'},
+    "ziwei": ${(category === '情感婚姻' || category === '事业运势' || category === '综合占卜') && birthData.year ? `{
+      "mainStar": "主星（紫微/天机/太阳/武曲/天同/廉贞等）",
+      "palace": "命宫位置",
+      "keyPalaces": {
+        "career": "官禄宫主星及吉凶",
+        "wealth": "财帛宫主星及吉凶",
+        "relationship": "夫妻宫主星及吉凶",
+        "health": "疾厄宫主星及吉凶"
+      }
+    }` : 'null'},
+    "fengshui": ${category === '风水布局' || category === '综合占卜' ? `{
+      "favorableDirection": ["东方", "南方"],
+      "unfavorableDirection": ["西北方"],
+      "suggestions": {
+        "color": "建议颜色（如：青色、绿色）",
+        "element": "补充五行（如：木、火）",
+        "placement": "重要摆设建议（100字以内）"
+      }
+    }` : 'null'}
+  }
 }
 
 要求：
@@ -105,7 +148,8 @@ Deno.serve(async (req) => {
 2. 给出的建议必须具体、可执行
 3. 解释清楚推演过程，让用户理解逻辑
 4. 语言要专业但易懂，避免过于玄虚
-5. 必须返回有效的JSON格式`;
+5. 必须返回有效的JSON格式
+6. visualData中根据类别和生辰信息生成真实的术数推演数据，如果无法生成则对应项设为null`;
 
     // Call AI
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {

@@ -5,6 +5,11 @@ import { ArrowLeft, Home, Sparkles, Wand2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 import { toast } from "sonner";
+import { BaziChart } from "@/components/divination/BaziChart";
+import { HexagramDisplay } from "@/components/divination/HexagramDisplay";
+import { QimenGrid } from "@/components/divination/QimenGrid";
+import { ZiweiPalace } from "@/components/divination/ZiweiPalace";
+import { FengshuiCompass } from "@/components/divination/FengshuiCompass";
 
 const Result = () => {
   const location = useLocation();
@@ -86,6 +91,29 @@ const Result = () => {
             </div>
           </div>
         </Card>
+
+        {/* Visual Data - Divination Charts */}
+        <div className="space-y-6">
+          {result.visualData?.bazi && (
+            <BaziChart data={result.visualData.bazi} />
+          )}
+
+          {result.visualData?.hexagram && (
+            <HexagramDisplay data={result.visualData.hexagram} />
+          )}
+
+          {result.visualData?.qimen && (
+            <QimenGrid data={result.visualData.qimen} />
+          )}
+
+          {result.visualData?.ziwei && (
+            <ZiweiPalace data={result.visualData.ziwei} />
+          )}
+
+          {result.visualData?.fengshui && (
+            <FengshuiCompass data={result.visualData.fengshui} />
+          )}
+        </div>
 
         {/* Result Sections */}
         <div className="space-y-6">
