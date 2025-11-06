@@ -5,7 +5,7 @@ import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/comp
 interface ZiweiData {
   mainStar: string;
   palace: string;
-  keyPalaces: {
+  keyPalaces?: {
     career: string;
     wealth: string;
     relationship: string;
@@ -90,31 +90,33 @@ export const ZiweiPalace = ({ data }: { data: ZiweiData }) => {
         </div>
 
         {/* Key Palaces Analysis */}
-        <div className="space-y-2">
-          <h3 className="text-base font-semibold text-accent mb-3">重要宫位分析</h3>
-          
-          <div className="grid gap-2">
-            <div className="p-3 bg-accent/5 rounded-lg border border-accent/20">
-              <div className="text-xs font-semibold text-accent mb-1">💼 官禄宫（事业）</div>
-              <p className="text-xs text-foreground/90">{data.keyPalaces.career}</p>
-            </div>
+        {data.keyPalaces && (
+          <div className="space-y-2">
+            <h3 className="text-base font-semibold text-accent mb-3">重要宫位分析</h3>
+            
+            <div className="grid gap-2">
+              <div className="p-3 bg-accent/5 rounded-lg border border-accent/20">
+                <div className="text-xs font-semibold text-accent mb-1">💼 官禄宫（事业）</div>
+                <p className="text-xs text-foreground/90">{data.keyPalaces.career}</p>
+              </div>
 
-            <div className="p-3 bg-accent/5 rounded-lg border border-accent/20">
-              <div className="text-xs font-semibold text-accent mb-1">💰 财帛宫（财运）</div>
-              <p className="text-xs text-foreground/90">{data.keyPalaces.wealth}</p>
-            </div>
+              <div className="p-3 bg-accent/5 rounded-lg border border-accent/20">
+                <div className="text-xs font-semibold text-accent mb-1">💰 财帛宫（财运）</div>
+                <p className="text-xs text-foreground/90">{data.keyPalaces.wealth}</p>
+              </div>
 
-            <div className="p-3 bg-accent/5 rounded-lg border border-accent/20">
-              <div className="text-xs font-semibold text-accent mb-1">❤️ 夫妻宫（姻缘）</div>
-              <p className="text-xs text-foreground/90">{data.keyPalaces.relationship}</p>
-            </div>
+              <div className="p-3 bg-accent/5 rounded-lg border border-accent/20">
+                <div className="text-xs font-semibold text-accent mb-1">❤️ 夫妻宫（姻缘）</div>
+                <p className="text-xs text-foreground/90">{data.keyPalaces.relationship}</p>
+              </div>
 
-            <div className="p-3 bg-accent/5 rounded-lg border border-accent/20">
-              <div className="text-xs font-semibold text-accent mb-1">🏥 疾厄宫（健康）</div>
-              <p className="text-xs text-foreground/90">{data.keyPalaces.health}</p>
+              <div className="p-3 bg-accent/5 rounded-lg border border-accent/20">
+                <div className="text-xs font-semibold text-accent mb-1">🏥 疾厄宫（健康）</div>
+                <p className="text-xs text-foreground/90">{data.keyPalaces.health}</p>
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </Card>
     </TooltipProvider>
   );
