@@ -1,4 +1,5 @@
 import { Card } from "@/components/ui/card";
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
 interface BaziPillar {
   heavenlyStem: string;
@@ -39,10 +40,10 @@ const elementNames: Record<string, string> = {
 
 export const BaziChart = ({ data }: { data: BaziData }) => {
   const pillars = [
-    { name: '年柱', data: data.year },
-    { name: '月柱', data: data.month },
-    { name: '日柱', data: data.day },
-    { name: '时柱', data: data.hour },
+    { name: '年柱', data: data.year, tooltip: '代表祖辈、童年时期（0-15岁）' },
+    { name: '月柱', data: data.month, tooltip: '代表父母、青年时期（16-30岁）' },
+    { name: '日柱', data: data.day, tooltip: '代表自己、配偶、中年时期（31-45岁）' },
+    { name: '时柱', data: data.hour, tooltip: '代表子女、晚年时期（46岁以后）' },
   ];
 
   const maxValue = data.elementBalance 
@@ -50,74 +51,101 @@ export const BaziChart = ({ data }: { data: BaziData }) => {
     : 0;
 
   return (
-    <Card className="p-8 bg-card/80 backdrop-blur-sm border-accent/20">
-      <h2 className="text-2xl font-bold text-accent border-b border-accent/20 pb-3 mb-6">
-        八字排盘
-      </h2>
-      
-      {/* Four Pillars */}
-      <div className="grid grid-cols-4 gap-4 mb-8">
-        {pillars.map((pillar, index) => (
-          <div key={index} className="text-center">
-            <div className="text-sm text-muted-foreground mb-2">{pillar.name}</div>
+    <TooltipProvider>
+      <Card className="p-6 bg-card/80 backdrop-blur-sm border-accent/20 max-w-3xl mx-auto">
+        <h2 className="text-xl font-bold text-accent border-b border-accent/20 pb-2 mb-4">
+          八字排盘
+        </h2>
+        
+        {/* Four Pillars */}
+        <div className="grid grid-cols-4 gap-2 mb-6">
+          {pillars.map((pillar, index) => (
+            <div key={index} className="text-center">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="text-xs text-muted-foreground mb-2 cursor-help">{pillar.name}</div>
+                </TooltipTrigger>
+                <TooltipContent>{pillar.tooltip}</TooltipContent>
+              </Tooltip>
+              <div className="space-y-1">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="bg-accent/10 border border-accent/30 rounded-lg p-2 cursor-help">
+                      <div className="text-lg font-bold text-accent">{pillar.data.heavenlyStem}</div>
+                      <div className="text-[10px] text-muted-foreground">天干</div>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>天干：代表天时、外在表现、主动性</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="bg-accent/10 border border-accent/30 rounded-lg p-2 cursor-help">
+                      <div className="text-lg font-bold text-accent">{pillar.data.earthlyBranch}</div>
+                      <div className="text-[10px] text-muted-foreground">地支</div>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>地支：代表地利、内在本质、被动性</TooltipContent>
+                </Tooltip>
+              </div>
+              <div 
+                className="mt-1 text-xs font-semibold px-2 py-0.5 rounded-full inline-block"
+                style={{ 
+                  backgroundColor: `${elementColors[pillar.data.element.toLowerCase()] || elementColors.earth}20`,
+                  color: elementColors[pillar.data.element.toLowerCase()] || elementColors.earth
+                }}
+              >
+                {pillar.data.element}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Day Master */}
+        <div className="mb-6 p-3 bg-gradient-to-r from-accent/5 to-accent/10 rounded-lg border border-accent/20">
+          <div className="text-center">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="text-xs text-muted-foreground mb-1 cursor-help">日主（本命五行）</div>
+              </TooltipTrigger>
+              <TooltipContent>日柱天干，代表命主自身的五行属性</TooltipContent>
+            </Tooltip>
+            <div className="text-2xl font-bold text-accent">{data.dayMaster}</div>
+          </div>
+        </div>
+
+        {/* Element Balance Chart */}
+        {data.elementBalance && (
+          <div>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <h3 className="text-base font-semibold text-accent mb-3 cursor-help">五行平衡</h3>
+              </TooltipTrigger>
+              <TooltipContent>五行（金木水火土）在八字中的强弱分布</TooltipContent>
+            </Tooltip>
             <div className="space-y-2">
-              <div className="bg-accent/10 border border-accent/30 rounded-lg p-3">
-                <div className="text-2xl font-bold text-accent">{pillar.data.heavenlyStem}</div>
-                <div className="text-xs text-muted-foreground mt-1">天干</div>
-              </div>
-              <div className="bg-accent/10 border border-accent/30 rounded-lg p-3">
-                <div className="text-2xl font-bold text-accent">{pillar.data.earthlyBranch}</div>
-                <div className="text-xs text-muted-foreground mt-1">地支</div>
-              </div>
-            </div>
-            <div 
-              className="mt-2 text-sm font-semibold px-3 py-1 rounded-full inline-block"
-              style={{ 
-                backgroundColor: `${elementColors[pillar.data.element.toLowerCase()] || elementColors.earth}20`,
-                color: elementColors[pillar.data.element.toLowerCase()] || elementColors.earth
-              }}
-            >
-              {pillar.data.element}
+              {Object.entries(data.elementBalance).map(([element, value]) => (
+                <div key={element}>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-sm font-medium" style={{ color: elementColors[element] }}>
+                      {elementNames[element]}
+                    </span>
+                    <span className="text-xs text-muted-foreground">{value}</span>
+                  </div>
+                  <div className="h-2 bg-muted rounded-full overflow-hidden">
+                    <div 
+                      className="h-full rounded-full transition-all duration-1000 ease-out"
+                      style={{ 
+                        width: `${(value / maxValue) * 100}%`,
+                        backgroundColor: elementColors[element]
+                      }}
+                    />
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
-        ))}
-      </div>
-
-      {/* Day Master */}
-      <div className="mb-8 p-4 bg-gradient-to-r from-accent/5 to-accent/10 rounded-lg border border-accent/20">
-        <div className="text-center">
-          <div className="text-sm text-muted-foreground mb-2">日主（本命五行）</div>
-          <div className="text-3xl font-bold text-accent">{data.dayMaster}</div>
-        </div>
-      </div>
-
-      {/* Element Balance Chart */}
-      {data.elementBalance && (
-        <div>
-          <h3 className="text-lg font-semibold text-accent mb-4">五行平衡</h3>
-          <div className="space-y-3">
-            {Object.entries(data.elementBalance).map(([element, value]) => (
-              <div key={element}>
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-sm font-medium" style={{ color: elementColors[element] }}>
-                    {elementNames[element]}
-                  </span>
-                  <span className="text-sm text-muted-foreground">{value}</span>
-                </div>
-                <div className="h-3 bg-muted rounded-full overflow-hidden">
-                  <div 
-                    className="h-full rounded-full transition-all duration-1000 ease-out"
-                    style={{ 
-                      width: `${(value / maxValue) * 100}%`,
-                      backgroundColor: elementColors[element]
-                    }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-    </Card>
+        )}
+      </Card>
+    </TooltipProvider>
   );
 };

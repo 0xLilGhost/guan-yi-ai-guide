@@ -1,5 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Compass } from "lucide-react";
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
 interface QimenData {
   palace: string;
@@ -41,64 +42,83 @@ export const QimenGrid = ({ data }: { data: QimenData }) => {
   ];
 
   return (
-    <Card className="p-8 bg-card/80 backdrop-blur-sm border-accent/20">
-      <h2 className="text-2xl font-bold text-accent border-b border-accent/20 pb-3 mb-6 flex items-center gap-2">
-        <Compass className="w-6 h-6" />
-        奇门遁甲 · 九宫格局
-      </h2>
+    <TooltipProvider>
+      <Card className="p-6 bg-card/80 backdrop-blur-sm border-accent/20 max-w-3xl mx-auto">
+        <h2 className="text-xl font-bold text-accent border-b border-accent/20 pb-2 mb-4 flex items-center gap-2">
+          <Compass className="w-5 h-5" />
+          奇门遁甲 · 九宫格局
+        </h2>
 
-      {/* Nine Palaces Grid */}
-      <div className="mb-8">
-        <div className="grid grid-cols-3 gap-2 max-w-md mx-auto">
-          {grid.map((row, rowIndex) => 
-            row.map((palace, colIndex) => {
-              const isActive = palace === data.palace;
-              return (
-                <div
-                  key={`${rowIndex}-${colIndex}`}
-                  className={`aspect-square border-2 rounded-lg p-4 transition-all ${
-                    isActive
-                      ? 'bg-accent/20 border-accent shadow-[0_0_20px_hsl(var(--accent)/0.3)] scale-105'
-                      : 'bg-card/50 border-accent/30 hover:bg-accent/5'
-                  }`}
-                >
-                  <div className="h-full flex flex-col items-center justify-center space-y-1">
-                    <div className={`text-xs font-semibold ${isActive ? 'text-accent' : 'text-muted-foreground'}`}>
-                      {palaceDirections[palace]}
-                    </div>
-                    <div className={`text-sm font-bold ${isActive ? 'text-accent' : 'text-foreground/70'}`}>
-                      {palace}
-                    </div>
-                    {isActive && (
-                      <div className="text-xs text-accent/80 mt-2 text-center">
-                        <div>★</div>
+        {/* Nine Palaces Grid */}
+        <div className="mb-6">
+          <div className="grid grid-cols-3 gap-1.5 max-w-xs mx-auto">
+            {grid.map((row, rowIndex) => 
+              row.map((palace, colIndex) => {
+                const isActive = palace === data.palace;
+                return (
+                  <Tooltip key={`${rowIndex}-${colIndex}`}>
+                    <TooltipTrigger asChild>
+                      <div
+                        className={`aspect-square border-2 rounded-lg p-2 transition-all cursor-help ${
+                          isActive
+                            ? 'bg-accent/20 border-accent shadow-[0_0_15px_hsl(var(--accent)/0.3)] scale-105'
+                            : 'bg-card/50 border-accent/30 hover:bg-accent/5'
+                        }`}
+                      >
+                        <div className="h-full flex flex-col items-center justify-center space-y-0.5">
+                          <div className={`text-[10px] font-semibold ${isActive ? 'text-accent' : 'text-muted-foreground'}`}>
+                            {palaceDirections[palace]}
+                          </div>
+                          <div className={`text-xs font-bold ${isActive ? 'text-accent' : 'text-foreground/70'}`}>
+                            {palace}
+                          </div>
+                          {isActive && (
+                            <div className="text-xs text-accent/80">★</div>
+                          )}
+                        </div>
                       </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })
-          )}
+                    </TooltipTrigger>
+                    <TooltipContent>九宫之一，对应特定方位和能量场</TooltipContent>
+                  </Tooltip>
+                );
+              })
+            )}
+          </div>
         </div>
-      </div>
 
-      {/* Details */}
-      <div className="grid md:grid-cols-2 gap-4">
-        <div className="p-4 bg-accent/5 rounded-lg border border-accent/20">
-          <div className="text-sm text-muted-foreground mb-1">值使门</div>
-          <div className="text-xl font-bold text-accent">{data.gate}</div>
+        {/* Details */}
+        <div className="grid md:grid-cols-2 gap-3 mb-3">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="p-3 bg-accent/5 rounded-lg border border-accent/20 cursor-help">
+                <div className="text-xs text-muted-foreground mb-0.5">值使门</div>
+                <div className="text-base font-bold text-accent">{data.gate}</div>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>八门之一，影响事物发展的关键因素</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="p-3 bg-accent/5 rounded-lg border border-accent/20 cursor-help">
+                <div className="text-xs text-muted-foreground mb-0.5">值符星</div>
+                <div className="text-base font-bold text-accent">{data.star}</div>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>九星之一，代表天时能量</TooltipContent>
+          </Tooltip>
         </div>
-        <div className="p-4 bg-accent/5 rounded-lg border border-accent/20">
-          <div className="text-sm text-muted-foreground mb-1">值符星</div>
-          <div className="text-lg font-bold text-accent">{data.star}</div>
-        </div>
-      </div>
 
-      <div className="mt-4 p-4 bg-gradient-to-r from-accent/5 to-accent/10 rounded-lg border border-accent/20">
-        <div className="text-sm text-muted-foreground mb-2">吉方位</div>
-        <div className="text-xl font-bold text-accent mb-3">{data.direction}</div>
-        <div className="text-sm text-foreground/90 leading-relaxed">{data.timing}</div>
-      </div>
-    </Card>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="p-3 bg-gradient-to-r from-accent/5 to-accent/10 rounded-lg border border-accent/20 cursor-help">
+              <div className="text-xs text-muted-foreground mb-1">吉方位</div>
+              <div className="text-base font-bold text-accent mb-2">{data.direction}</div>
+              <div className="text-xs text-foreground/90 leading-relaxed">{data.timing}</div>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent>最有利的行动方向和时机</TooltipContent>
+        </Tooltip>
+      </Card>
+    </TooltipProvider>
   );
 };
