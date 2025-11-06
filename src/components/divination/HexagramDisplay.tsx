@@ -74,9 +74,14 @@ export const HexagramDisplay = ({ data }: { data: HexagramData }) => {
   return (
     <TooltipProvider>
       <Card className="p-6 bg-card/80 backdrop-blur-sm border-accent/20 max-w-3xl mx-auto">
-        <h2 className="text-xl font-bold text-accent border-b border-accent/20 pb-2 mb-4">
-          梅花易数 · 卦象
-        </h2>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <h2 className="text-xl font-bold text-accent border-b border-accent/20 pb-2 mb-4 cursor-help">
+              梅花易数 · 卦象
+            </h2>
+          </TooltipTrigger>
+          <TooltipContent>梅花易数：宋代邵雍所创，通过数字起卦预测吉凶的占卜方法</TooltipContent>
+        </Tooltip>
 
         <div className="grid md:grid-cols-3 gap-6 items-center">
           {/* Original Hexagram */}
@@ -88,9 +93,24 @@ export const HexagramDisplay = ({ data }: { data: HexagramData }) => {
                 </TooltipTrigger>
                 <TooltipContent>原始卦象，代表当前状态</TooltipContent>
               </Tooltip>
-              <div className="text-base font-bold text-accent">
-                {data.upper}{data.lower}
-              </div>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="text-base font-bold text-accent cursor-help">
+                    {data.upper}{data.lower}
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  上卦{data.upper}，下卦{data.lower}。
+                  {data.upper === '乾' && '乾：天，代表刚健、进取'}
+                  {data.upper === '坤' && '坤：地，代表柔顺、包容'}
+                  {data.upper === '震' && '震：雷，代表震动、行动'}
+                  {data.upper === '巽' && '巽：风，代表流通、温和'}
+                  {data.upper === '坎' && '坎：水，代表智慧、险阻'}
+                  {data.upper === '离' && '离：火，代表光明、热情'}
+                  {data.upper === '艮' && '艮：山，代表稳重、止息'}
+                  {data.upper === '兑' && '兑：泽，代表喜悦、交流'}
+                </TooltipContent>
+              </Tooltip>
             </div>
             <HexagramLines upper={data.upper} lower={data.lower} changing={data.changing} />
             <div className="text-center">

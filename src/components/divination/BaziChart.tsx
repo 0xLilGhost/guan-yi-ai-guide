@@ -53,9 +53,14 @@ export const BaziChart = ({ data }: { data: BaziData }) => {
   return (
     <TooltipProvider>
       <Card className="p-6 bg-card/80 backdrop-blur-sm border-accent/20 max-w-3xl mx-auto">
-        <h2 className="text-xl font-bold text-accent border-b border-accent/20 pb-2 mb-4">
-          八字排盘
-        </h2>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <h2 className="text-xl font-bold text-accent border-b border-accent/20 pb-2 mb-4 cursor-help">
+              八字排盘
+            </h2>
+          </TooltipTrigger>
+          <TooltipContent>八字：根据出生年月日时排出的四柱八个字，用于推算命运</TooltipContent>
+        </Tooltip>
         
         {/* Four Pillars */}
         <div className="grid grid-cols-4 gap-2 mb-6">

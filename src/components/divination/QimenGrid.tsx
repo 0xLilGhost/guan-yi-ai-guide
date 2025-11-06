@@ -44,10 +44,15 @@ export const QimenGrid = ({ data }: { data: QimenData }) => {
   return (
     <TooltipProvider>
       <Card className="p-6 bg-card/80 backdrop-blur-sm border-accent/20 max-w-3xl mx-auto">
-        <h2 className="text-xl font-bold text-accent border-b border-accent/20 pb-2 mb-4 flex items-center gap-2">
-          <Compass className="w-5 h-5" />
-          奇门遁甲 · 九宫格局
-        </h2>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <h2 className="text-xl font-bold text-accent border-b border-accent/20 pb-2 mb-4 flex items-center gap-2 cursor-help">
+              <Compass className="w-5 h-5" />
+              奇门遁甲 · 九宫格局
+            </h2>
+          </TooltipTrigger>
+          <TooltipContent>奇门遁甲：古代兵法术数，通过时间、空间、人事推算吉凶方位</TooltipContent>
+        </Tooltip>
 
         {/* Nine Palaces Grid */}
         <div className="mb-6">

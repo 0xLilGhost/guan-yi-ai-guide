@@ -27,10 +27,15 @@ export const FengshuiCompass = ({ data }: { data: FengshuiData }) => {
   return (
     <TooltipProvider>
       <Card className="p-6 bg-card/80 backdrop-blur-sm border-accent/20 max-w-3xl mx-auto">
-        <h2 className="text-xl font-bold text-accent border-b border-accent/20 pb-2 mb-4 flex items-center gap-2">
-          <Compass className="w-5 h-5" />
-          风水罗盘 · 方位分析
-        </h2>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <h2 className="text-xl font-bold text-accent border-b border-accent/20 pb-2 mb-4 flex items-center gap-2 cursor-help">
+              <Compass className="w-5 h-5" />
+              风水罗盘 · 方位分析
+            </h2>
+          </TooltipTrigger>
+          <TooltipContent>风水：研究环境气场与人的关系，通过调整方位布局改善运势</TooltipContent>
+        </Tooltip>
 
         {/* Compass */}
         <div className="mb-6 flex justify-center">
@@ -88,18 +93,28 @@ export const FengshuiCompass = ({ data }: { data: FengshuiData }) => {
 
         {/* Directions Summary */}
         <div className="grid md:grid-cols-2 gap-3 mb-4">
-          <div className="p-3 bg-green-500/10 rounded-lg border border-green-500/30">
-            <div className="text-xs font-semibold text-green-600 mb-1">吉方位</div>
-            <div className="text-sm text-green-700 font-bold">
-              {data.favorableDirection.join('、')}
-            </div>
-          </div>
-          <div className="p-3 bg-red-500/10 rounded-lg border border-red-500/30">
-            <div className="text-xs font-semibold text-red-600 mb-1">凶方位</div>
-            <div className="text-sm text-red-700 font-bold">
-              {data.unfavorableDirection.join('、')}
-            </div>
-          </div>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="p-3 bg-green-500/10 rounded-lg border border-green-500/30 cursor-help">
+                <div className="text-xs font-semibold text-green-600 mb-1">吉方位</div>
+                <div className="text-sm text-green-700 font-bold">
+                  {data.favorableDirection.join('、')}
+                </div>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>有利的方位，适合面向此方工作、睡眠或出行</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="p-3 bg-red-500/10 rounded-lg border border-red-500/30 cursor-help">
+                <div className="text-xs font-semibold text-red-600 mb-1">凶方位</div>
+                <div className="text-sm text-red-700 font-bold">
+                  {data.unfavorableDirection.join('、')}
+                </div>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>不利的方位，应避免长时间面向或朝向此方</TooltipContent>
+          </Tooltip>
         </div>
 
         {/* Suggestions */}

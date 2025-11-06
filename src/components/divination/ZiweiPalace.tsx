@@ -38,16 +38,39 @@ export const ZiweiPalace = ({ data }: { data: ZiweiData }) => {
   return (
     <TooltipProvider>
       <Card className="p-6 bg-card/80 backdrop-blur-sm border-accent/20 max-w-3xl mx-auto">
-        <h2 className="text-xl font-bold text-accent border-b border-accent/20 pb-2 mb-4 flex items-center gap-2">
-          <Star className="w-5 h-5" />
-          紫微斗数 · 命盘
-        </h2>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <h2 className="text-xl font-bold text-accent border-b border-accent/20 pb-2 mb-4 flex items-center gap-2 cursor-help">
+              <Star className="w-5 h-5" />
+              紫微斗数 · 命盘
+            </h2>
+          </TooltipTrigger>
+          <TooltipContent>紫微斗数：中国古代星命术，通过出生时辰推算命运轨迹</TooltipContent>
+        </Tooltip>
 
         {/* Main Star */}
         <div className="mb-6 p-4 bg-gradient-to-br from-accent/10 to-accent/5 rounded-lg border-2 border-accent/30">
           <div className="text-center">
-            <div className="text-xs text-muted-foreground mb-1">主星</div>
-            <div className="text-2xl font-bold text-accent mb-1">{data.mainStar}</div>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="text-xs text-muted-foreground mb-1 cursor-help">主星</div>
+              </TooltipTrigger>
+              <TooltipContent>命盘中最重要的星曜，决定性格特质和命运主线</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="text-2xl font-bold text-accent mb-1 cursor-help">{data.mainStar}</div>
+              </TooltipTrigger>
+              <TooltipContent>
+                {data.mainStar.includes('紫微') && '紫微星：帝王之星，领导能力强'}
+                {data.mainStar.includes('天机') && '天机星：智慧之星，善于谋略'}
+                {data.mainStar.includes('太阳') && '太阳星：光明之星，热情开朗'}
+                {data.mainStar.includes('武曲') && '武曲星：财星，理财能力佳'}
+                {data.mainStar.includes('天同') && '天同星：福星，平和快乐'}
+                {data.mainStar.includes('廉贞') && '廉贞星：桃花星，魅力十足'}
+                {!data.mainStar.match(/紫微|天机|太阳|武曲|天同|廉贞/) && '重要星曜，影响命运走向'}
+              </TooltipContent>
+            </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
                 <div className="text-xs text-accent/80 cursor-help">坐守 {data.palace}</div>
@@ -95,25 +118,45 @@ export const ZiweiPalace = ({ data }: { data: ZiweiData }) => {
             <h3 className="text-base font-semibold text-accent mb-3">重要宫位分析</h3>
             
             <div className="grid gap-2">
-              <div className="p-3 bg-accent/5 rounded-lg border border-accent/20">
-                <div className="text-xs font-semibold text-accent mb-1">💼 官禄宫（事业）</div>
-                <p className="text-xs text-foreground/90">{data.keyPalaces.career}</p>
-              </div>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="p-3 bg-accent/5 rounded-lg border border-accent/20 cursor-help">
+                    <div className="text-xs font-semibold text-accent mb-1">💼 官禄宫（事业）</div>
+                    <p className="text-xs text-foreground/90">{data.keyPalaces.career}</p>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>官禄宫：代表事业发展、工作状况、社会地位</TooltipContent>
+              </Tooltip>
 
-              <div className="p-3 bg-accent/5 rounded-lg border border-accent/20">
-                <div className="text-xs font-semibold text-accent mb-1">💰 财帛宫（财运）</div>
-                <p className="text-xs text-foreground/90">{data.keyPalaces.wealth}</p>
-              </div>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="p-3 bg-accent/5 rounded-lg border border-accent/20 cursor-help">
+                    <div className="text-xs font-semibold text-accent mb-1">💰 财帛宫（财运）</div>
+                    <p className="text-xs text-foreground/90">{data.keyPalaces.wealth}</p>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>财帛宫：代表财富状况、理财能力、收入来源</TooltipContent>
+              </Tooltip>
 
-              <div className="p-3 bg-accent/5 rounded-lg border border-accent/20">
-                <div className="text-xs font-semibold text-accent mb-1">❤️ 夫妻宫（姻缘）</div>
-                <p className="text-xs text-foreground/90">{data.keyPalaces.relationship}</p>
-              </div>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="p-3 bg-accent/5 rounded-lg border border-accent/20 cursor-help">
+                    <div className="text-xs font-semibold text-accent mb-1">❤️ 夫妻宫（姻缘）</div>
+                    <p className="text-xs text-foreground/90">{data.keyPalaces.relationship}</p>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>夫妻宫：代表婚姻感情、配偶特质、恋爱运势</TooltipContent>
+              </Tooltip>
 
-              <div className="p-3 bg-accent/5 rounded-lg border border-accent/20">
-                <div className="text-xs font-semibold text-accent mb-1">🏥 疾厄宫（健康）</div>
-                <p className="text-xs text-foreground/90">{data.keyPalaces.health}</p>
-              </div>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="p-3 bg-accent/5 rounded-lg border border-accent/20 cursor-help">
+                    <div className="text-xs font-semibold text-accent mb-1">🏥 疾厄宫（健康）</div>
+                    <p className="text-xs text-foreground/90">{data.keyPalaces.health}</p>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>疾厄宫：代表健康状况、体质强弱、疾病倾向</TooltipContent>
+              </Tooltip>
             </div>
           </div>
         )}
