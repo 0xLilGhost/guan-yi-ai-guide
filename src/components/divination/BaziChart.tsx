@@ -8,10 +8,10 @@ interface BaziPillar {
 }
 
 interface BaziData {
-  year: BaziPillar;
-  month: BaziPillar;
-  day: BaziPillar;
-  hour: BaziPillar;
+  year: BaziPillar | null;
+  month: BaziPillar | null;
+  day: BaziPillar | null;
+  hour: BaziPillar | null;
   dayMaster: string;
   elementBalance?: {
     wood: number;
@@ -64,7 +64,7 @@ export const BaziChart = ({ data }: { data: BaziData }) => {
         
         {/* Four Pillars */}
         <div className="grid grid-cols-4 gap-2 mb-6">
-          {pillars.map((pillar, index) => (
+          {pillars.filter(pillar => pillar.data !== null).map((pillar, index) => (
             <div key={index} className="text-center">
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -76,7 +76,7 @@ export const BaziChart = ({ data }: { data: BaziData }) => {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <div className="bg-accent/10 border border-accent/30 rounded-lg p-2 cursor-help">
-                      <div className="text-lg font-bold text-accent">{pillar.data.heavenlyStem}</div>
+                      <div className="text-lg font-bold text-accent">{pillar.data!.heavenlyStem}</div>
                       <div className="text-[10px] text-muted-foreground">天干</div>
                     </div>
                   </TooltipTrigger>
@@ -85,7 +85,7 @@ export const BaziChart = ({ data }: { data: BaziData }) => {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <div className="bg-accent/10 border border-accent/30 rounded-lg p-2 cursor-help">
-                      <div className="text-lg font-bold text-accent">{pillar.data.earthlyBranch}</div>
+                      <div className="text-lg font-bold text-accent">{pillar.data!.earthlyBranch}</div>
                       <div className="text-[10px] text-muted-foreground">地支</div>
                     </div>
                   </TooltipTrigger>
@@ -95,11 +95,11 @@ export const BaziChart = ({ data }: { data: BaziData }) => {
               <div 
                 className="mt-1 text-xs font-semibold px-2 py-0.5 rounded-full inline-block"
                 style={{ 
-                  backgroundColor: `${elementColors[pillar.data.element.toLowerCase()] || elementColors.earth}20`,
-                  color: elementColors[pillar.data.element.toLowerCase()] || elementColors.earth
+                  backgroundColor: `${elementColors[pillar.data!.element.toLowerCase()] || elementColors.earth}20`,
+                  color: elementColors[pillar.data!.element.toLowerCase()] || elementColors.earth
                 }}
               >
-                {pillar.data.element}
+                {pillar.data!.element}
               </div>
             </div>
           ))}
