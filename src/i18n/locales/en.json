@@ -1,5 +1,6 @@
 {
   "common": {
+    "language": "en",
     "backToHome": "Back to Home",
     "back": "Back",
     "loading": "Loading...",

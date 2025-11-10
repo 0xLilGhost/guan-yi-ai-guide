@@ -107,6 +107,7 @@ const Inquiry = () => {
         body: {
           category: categoryTitle,
           question: formData.question,
+          language: t('common.language'),
           birthData: {
             year: formData.birthYear,
             month: formData.birthMonth,

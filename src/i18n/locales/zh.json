@@ -1,5 +1,6 @@
 {
   "common": {
+    "language": "zh",
     "backToHome": "返回首页",
     "back": "返回",
     "loading": "加载中...",
