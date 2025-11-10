@@ -7,7 +7,6 @@ import Index from "./pages/Index";
 import Inquiry from "./pages/Inquiry";
 import Result from "./pages/Result";
 import NotFound from "./pages/NotFound";
-import "./i18n/config";
 
 const queryClient = new QueryClient();
 

@@ -1,29 +1,23 @@
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { useTranslation } from "react-i18next";
 
 interface CategoryCardProps {
-  titleKey: string;
-  subtitleKey: string;
-  descriptionKey: string;
+  title: string;
+  subtitle: string;
+  description: string;
   gradient: string;
   index: number;
 }
 
 const CategoryCard = ({
-  titleKey,
-  subtitleKey,
-  descriptionKey,
+  title,
+  subtitle,
+  description,
   gradient,
   index,
 }: CategoryCardProps) => {
   const navigate = useNavigate();
-  const { t } = useTranslation();
-  
-  const title = t(titleKey);
-  const subtitle = t(subtitleKey);
-  const description = t(descriptionKey);
 
   const handleClick = () => {
     navigate('/inquiry', { state: { category: title } });
