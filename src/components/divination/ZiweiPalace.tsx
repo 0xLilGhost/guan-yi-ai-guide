@@ -59,16 +59,17 @@ export const ZiweiPalace = ({ data }: { data: ZiweiData }) => {
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className="text-2xl font-bold text-accent mb-1 cursor-help">{data.mainStar}</div>
+                <div className="text-2xl font-bold text-accent mb-1 cursor-help">{data.mainStar || '未知'}</div>
               </TooltipTrigger>
               <TooltipContent>
-                {data.mainStar.includes('紫微') && '紫微星：帝王之星，领导能力强'}
-                {data.mainStar.includes('天机') && '天机星：智慧之星，善于谋略'}
-                {data.mainStar.includes('太阳') && '太阳星：光明之星，热情开朗'}
-                {data.mainStar.includes('武曲') && '武曲星：财星，理财能力佳'}
-                {data.mainStar.includes('天同') && '天同星：福星，平和快乐'}
-                {data.mainStar.includes('廉贞') && '廉贞星：桃花星，魅力十足'}
-                {!data.mainStar.match(/紫微|天机|太阳|武曲|天同|廉贞/) && '重要星曜，影响命运走向'}
+                {data.mainStar?.includes('紫微') && '紫微星：帝王之星，领导能力强'}
+                {data.mainStar?.includes('天机') && '天机星：智慧之星，善于谋略'}
+                {data.mainStar?.includes('太阳') && '太阳星：光明之星，热情开朗'}
+                {data.mainStar?.includes('武曲') && '武曲星：财星，理财能力佳'}
+                {data.mainStar?.includes('天同') && '天同星：福星，平和快乐'}
+                {data.mainStar?.includes('廉贞') && '廉贞星：桃花星，魅力十足'}
+                {data.mainStar && !data.mainStar.match(/紫微|天机|太阳|武曲|天同|廉贞/) && '重要星曜，影响命运走向'}
+                {!data.mainStar && '主星信息'}
               </TooltipContent>
             </Tooltip>
             <Tooltip>
