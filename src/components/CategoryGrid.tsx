@@ -1,50 +1,54 @@
 import CategoryCard from "./CategoryCard";
 import BaguaDiagram from "./BaguaDiagram";
-
-const categories = [
-  {
-    title: "事业运势",
-    subtitle: "Career Fortune",
-    description: "职场发展 · 投资决策 · 事业转机",
-    gradient: "from-red-900/40 to-red-950/40",
-  },
-  {
-    title: "情感婚姻",
-    subtitle: "Love & Marriage",
-    description: "姻缘配对 · 情感走向 · 婚姻和合",
-    gradient: "from-pink-900/40 to-rose-950/40",
-  },
-  {
-    title: "健康养生",
-    subtitle: "Health & Wellness",
-    description: "五行调理 · 身心平衡 · 养生之道",
-    gradient: "from-green-900/40 to-emerald-950/40",
-  },
-  {
-    title: "风水布局",
-    subtitle: "Feng Shui",
-    description: "家居布局 · 财位分析 · 气场调整",
-    gradient: "from-amber-900/40 to-yellow-950/40",
-  },
-  {
-    title: "综合占卜",
-    subtitle: "General Divination",
-    description: "吉凶预测 · 时机把握 · 趋吉避凶",
-    gradient: "from-purple-900/40 to-indigo-950/40",
-  },
-];
+import { useTranslation } from "react-i18next";
 
 const CategoryGrid = () => {
+  const { t } = useTranslation();
+  
+  const categories = [
+    {
+      titleKey: "categories.career.title",
+      subtitleKey: "categories.career.subtitle",
+      descriptionKey: "categories.career.description",
+      gradient: "from-red-900/40 to-red-950/40",
+    },
+    {
+      titleKey: "categories.love.title",
+      subtitleKey: "categories.love.subtitle",
+      descriptionKey: "categories.love.description",
+      gradient: "from-pink-900/40 to-rose-950/40",
+    },
+    {
+      titleKey: "categories.health.title",
+      subtitleKey: "categories.health.subtitle",
+      descriptionKey: "categories.health.description",
+      gradient: "from-green-900/40 to-emerald-950/40",
+    },
+    {
+      titleKey: "categories.fengshui.title",
+      subtitleKey: "categories.fengshui.subtitle",
+      descriptionKey: "categories.fengshui.description",
+      gradient: "from-amber-900/40 to-yellow-950/40",
+    },
+    {
+      titleKey: "categories.general.title",
+      subtitleKey: "categories.general.subtitle",
+      descriptionKey: "categories.general.description",
+      gradient: "from-purple-900/40 to-indigo-950/40",
+    },
+  ];
+  
+
   return (
     <section className="relative px-6 py-32">
       <div className="max-w-7xl mx-auto">
         {/* Section header */}
         <div className="text-center mb-24 space-y-4">
           <h2 className="text-4xl md:text-5xl font-bold text-accent">
-            选择咨询类别
+            {t('categories.sectionTitle')}
           </h2>
           <p className="text-muted-foreground text-lg">
-            Choose Your Path of Inquiry
+            {t('categories.sectionSubtitle')}
           </p>
         </div>
 

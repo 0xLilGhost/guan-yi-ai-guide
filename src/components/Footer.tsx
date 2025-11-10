@@ -1,4 +1,8 @@
+import { useTranslation } from "react-i18next";
+
 const Footer = () => {
+  const { t } = useTranslation();
+  
   return (
     <footer className="relative border-t border-border/30 mt-20">
       <div className="max-w-7xl mx-auto px-6 py-12">
@@ -10,10 +14,10 @@ const Footer = () => {
 
           {/* Tagline */}
           <p className="text-muted-foreground max-w-md">
-            古老智慧与现代科技的完美融合
+            {t('footer.tagline')}
             <br />
             <span className="text-sm opacity-70">
-              The Perfect Blend of Ancient Wisdom and Modern Technology
+              {t('footer.taglineEn')}
             </span>
           </p>
 
@@ -26,7 +30,7 @@ const Footer = () => {
 
           {/* Copyright */}
           <p className="text-sm text-muted-foreground/60">
-            © 2025 观易 · 仅供参考，非绝对命运
+            {t('footer.copyright')}
           </p>
         </div>
       </div>

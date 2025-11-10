@@ -1,6 +1,9 @@
 import { Sparkles } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const Hero = () => {
+  const { t } = useTranslation();
+  
   return (
     <section className="relative min-h-[70vh] flex flex-col items-center justify-center px-6 py-20 overflow-hidden">
       {/* Mystical background effect */}
@@ -26,7 +29,7 @@ const Hero = () => {
         {/* Main title */}
         <div className="space-y-4">
           <h1 className="text-7xl md:text-8xl font-black tracking-wider text-gradient-gold animate-fade-in">
-            观易
+            {t('hero.title')}
           </h1>
           <div className="flex items-center justify-center gap-3">
             <div className="h-px w-16 bg-gradient-to-r from-transparent to-accent"></div>
@@ -37,16 +40,16 @@ const Hero = () => {
 
         {/* Subtitle */}
         <p className="text-2xl md:text-3xl text-foreground/90 font-serif tracking-wide">
-          融合传统玄学与现代AI的智能决策指引
+          {t('hero.subtitle')}
         </p>
 
         {/* Description */}
         <div className="space-y-3 text-muted-foreground text-lg max-w-2xl mx-auto">
           <p className="leading-relaxed">
-            梅花易数 · 紫微斗数 · 风水学 · 奇门遁甲 · 太乙神数
+            {t('hero.methods')}
           </p>
           <p className="text-base opacity-80">
-            AI智能解析，助您洞察天机，把握时运
+            {t('hero.description')}
           </p>
         </div>
 

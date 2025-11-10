@@ -8,6 +8,8 @@ import { Card } from "@/components/ui/card";
 import { Sparkles, ArrowLeft, Briefcase, Heart, Activity, Home, Layers } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 // Category styling configurations based on Five Elements
 const categoryStyles = {
@@ -62,7 +64,8 @@ const Inquiry = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const categoryTitle = location.state?.category || "综合占卜";
+  const { t } = useTranslation();
+  const categoryTitle = location.state?.category || t('categories.general.title');
   
   const categoryStyle = useMemo(() => 
     categoryStyles[categoryTitle as keyof typeof categoryStyles] || categoryStyles['综合占卜'],
@@ -90,8 +93,8 @@ const Inquiry = () => {
     
     if (!formData.question.trim()) {
       toast({
-        title: "请输入您的问题",
-        description: "问题不能为空",
+        title: t('inquiry.questionEmpty'),
+        description: t('inquiry.questionEmptyDesc'),
         variant: "destructive",
       });
       return;
@@ -132,8 +135,8 @@ const Inquiry = () => {
     } catch (error) {
       console.error('Divination error:', error);
       toast({
-        title: "占卜失败",
-        description: "请稍后重试",
+        title: t('inquiry.divinationFailed'),
+        description: t('inquiry.retryLater'),
         variant: "destructive",
       });
     } finally {
@@ -146,6 +149,7 @@ const Inquiry = () => {
       className="min-h-screen px-6 py-12 relative overflow-hidden"
       style={{ background: categoryStyle.bgGradient }}
     >
+      <LanguageSwitcher />
       {/* Decorative Element Badge */}
       <div className="absolute top-8 right-8 opacity-10 text-9xl font-bold select-none pointer-events-none">
         {categoryStyle.element}
@@ -194,17 +198,17 @@ const Inquiry = () => {
                 style={{ color: categoryStyle.primaryColor }}
               >
                 <Sparkles className="w-4 h-4" />
-                您的问题 *
+                {t('inquiry.questionLabel')} {t('inquiry.questionRequired')}
               </Label>
               <Textarea
                 id="question"
-                placeholder={`例如：${
-                  categoryTitle === '事业运势' ? '我适合什么时候换工作？今年事业运势如何？' :
-                  categoryTitle === '情感婚姻' ? '我和ta的姻缘如何？何时能遇到正缘？' :
-                  categoryTitle === '健康养生' ? '我的身体状况如何？需要注意什么？' :
-                  categoryTitle === '风水布局' ? '我的房屋风水如何？如何改善？' :
-                  '请输入您想咨询的问题'
-                }`}
+                placeholder={
+                  categoryTitle === t('categories.career.title') ? t('inquiry.questionPlaceholder.career') :
+                  categoryTitle === t('categories.love.title') ? t('inquiry.questionPlaceholder.love') :
+                  categoryTitle === t('categories.health.title') ? t('inquiry.questionPlaceholder.health') :
+                  categoryTitle === t('categories.fengshui.title') ? t('inquiry.questionPlaceholder.fengshui') :
+                  t('inquiry.questionPlaceholder.default')
+                }
                 value={formData.question}
                 onChange={(e) => setFormData({ ...formData, question: e.target.value })}
                 className="min-h-[120px] bg-background/50 backdrop-blur-sm transition-all focus:ring-2"
@@ -223,15 +227,15 @@ const Inquiry = () => {
                 className="text-lg font-semibold"
                 style={{ color: categoryStyle.primaryColor }}
               >
-                生辰信息（可选）
+                {t('inquiry.birthInfo')}
               </Label>
               <p className="text-sm text-foreground/70">
-                提供生辰八字可获得更精准的术数分析
+                {t('inquiry.birthInfoDesc')}
               </p>
 
               <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="year">年份</Label>
+                  <Label htmlFor="year">{t('inquiry.year')}</Label>
                   <Input
                     id="year"
                     type="number"
@@ -244,7 +248,7 @@ const Inquiry = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="month">月份</Label>
+                  <Label htmlFor="month">{t('inquiry.month')}</Label>
                   <Input
                     id="month"
                     type="number"
@@ -259,7 +263,7 @@ const Inquiry = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="day">日期</Label>
+                  <Label htmlFor="day">{t('inquiry.day')}</Label>
                   <Input
                     id="day"
                     type="number"
@@ -274,7 +278,7 @@ const Inquiry = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="hour">时</Label>
+                  <Label htmlFor="hour">{t('inquiry.hour')}</Label>
                   <Input
                     id="hour"
                     type="number"
@@ -289,7 +293,7 @@ const Inquiry = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="minute">分</Label>
+                  <Label htmlFor="minute">{t('inquiry.minute')}</Label>
                   <Input
                     id="minute"
                     type="number"
@@ -305,7 +309,7 @@ const Inquiry = () => {
               </div>
 
               <div className="space-y-2">
-                <Label>性别</Label>
+                <Label>{t('inquiry.gender')}</Label>
                 <div className="flex gap-4">
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
@@ -316,7 +320,7 @@ const Inquiry = () => {
                       onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
                       className="w-4 h-4 text-accent"
                     />
-                    <span className="text-foreground">男</span>
+                    <span className="text-foreground">{t('inquiry.male')}</span>
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
@@ -327,7 +331,7 @@ const Inquiry = () => {
                       onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
                       className="w-4 h-4 text-accent"
                     />
-                    <span className="text-foreground">女</span>
+                    <span className="text-foreground">{t('inquiry.female')}</span>
                   </label>
                 </div>
               </div>
@@ -338,11 +342,11 @@ const Inquiry = () => {
               <div className="space-y-4 p-6 rounded-lg bg-background/30 backdrop-blur-sm border"
                 style={{ borderColor: `${categoryStyle.primaryColor}20` }}
               >
-                <Label 
+              <Label 
                   className="text-lg font-semibold"
                   style={{ color: categoryStyle.primaryColor }}
                 >
-                  起卦方式
+                  {t('inquiry.divineMethod')}
                 </Label>
                 <div className="grid grid-cols-2 gap-3">
                   <button
@@ -354,7 +358,7 @@ const Inquiry = () => {
                         : 'bg-background/20 border-primary/20 hover:bg-background/30'
                     }`}
                   >
-                    <span className="font-medium">时间起卦</span>
+                    <span className="font-medium">{t('inquiry.timeMethod')}</span>
                   </button>
                   <button
                     type="button"
@@ -365,34 +369,34 @@ const Inquiry = () => {
                         : 'bg-background/20 border-primary/20 hover:bg-background/30'
                     }`}
                   >
-                    <span className="font-medium">数字起卦</span>
+                    <span className="font-medium">{t('inquiry.numberMethod')}</span>
                   </button>
                 </div>
 
                 {divineMethod === 'number' && (
                   <div className="grid grid-cols-2 gap-3 mt-4">
                     <div className="space-y-2">
-                      <Label htmlFor="num1">上卦数</Label>
+                      <Label htmlFor="num1">{t('inquiry.upperNumber')}</Label>
                       <Input
                         id="num1"
                         type="number"
                         min="1"
                         value={number1}
                         onChange={(e) => setNumber1(e.target.value)}
-                        placeholder="任意正整数"
+                        placeholder={t('inquiry.anyNumber')}
                         className="bg-background/50"
                         style={{ borderColor: `${categoryStyle.primaryColor}30` }}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="num2">下卦数</Label>
+                      <Label htmlFor="num2">{t('inquiry.lowerNumber')}</Label>
                       <Input
                         id="num2"
                         type="number"
                         min="1"
                         value={number2}
                         onChange={(e) => setNumber2(e.target.value)}
-                        placeholder="任意正整数"
+                        placeholder={t('inquiry.anyNumber')}
                         className="bg-background/50"
                         style={{ borderColor: `${categoryStyle.primaryColor}30` }}
                       />
@@ -401,8 +405,8 @@ const Inquiry = () => {
                 )}
                 <p className="text-sm text-foreground/70 mt-2">
                   {divineMethod === 'time' 
-                    ? '将使用您提供的出生时间或当前时间自动起卦' 
-                    : '请输入两个数字，系统将自动计算卦象'}
+                    ? t('inquiry.timeMethodDesc')
+                    : t('inquiry.numberMethodDesc')}
                 </p>
               </div>
             )}
@@ -420,12 +424,12 @@ const Inquiry = () => {
               {isLoading ? (
                 <span className="flex items-center gap-2 text-white">
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  正在占卜中...
+                  {t('common.divining')}
                 </span>
               ) : (
                 <span className="flex items-center gap-2 text-white">
                   <Sparkles className="w-5 h-5" />
-                  开始占卜
+                  {t('common.startDivination')}
                 </span>
               )}
             </Button>
@@ -440,8 +444,8 @@ const Inquiry = () => {
             background: `${categoryStyle.primaryColor}05`
           }}
         >
-          <p className="text-foreground/70">* 占卜结果仅供参考，具体决策请结合实际情况</p>
-          <p className="mt-1 text-foreground/70">AI整合传统术数逻辑，助您洞察天机</p>
+          <p className="text-foreground/70">{t('inquiry.disclaimer1')}</p>
+          <p className="mt-1 text-foreground/70">{t('inquiry.disclaimer2')}</p>
         </div>
       </div>
     </div>
