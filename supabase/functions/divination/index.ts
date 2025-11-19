@@ -37,8 +37,8 @@ Deno.serve(async (req) => {
 
     console.log('Divination request:', { category, question, hasBirthData: !!birthData.year, divineMethod: divineData?.method });
 
-    // Traditional Bazi calculation implementation
-    const calculateBaziTraditional = () => {
+    // Traditional Bazi calculation using lunar-javascript (6tail)
+    const calculateBaziTraditional = async () => {
       if (!birthData.year || !birthData.month || !birthData.day) {
         return null;
       }
@@ -48,32 +48,24 @@ Deno.serve(async (req) => {
         const month = parseInt(birthData.month);
         const day = parseInt(birthData.day);
         const hour = birthData.hour ? parseInt(birthData.hour) : 12;
+        const minute = birthData.minute ? parseInt(birthData.minute) : 0;
 
-        // Heavenly Stems (天干)
-        const heavenlyStems = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
-        // Earthly Branches (地支)
-        const earthlyBranches = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
-        
-        // Calculate Year Pillar (年柱) - simplified using year mod
-        const yearStemIndex = (year - 4) % 10;
-        const yearBranchIndex = (year - 4) % 12;
-        
-        // Calculate Month Pillar (月柱) - simplified
-        const monthStemIndex = (yearStemIndex * 2 + month) % 10;
-        const monthBranchIndex = (month + 1) % 12;
-        
-        // Calculate Day Pillar (日柱) - using Julian day number approximation
-        const baseDate = new Date(1900, 0, 1);
-        const currentDate = new Date(year, month - 1, day);
-        const daysDiff = Math.floor((currentDate.getTime() - baseDate.getTime()) / (1000 * 60 * 60 * 24));
-        const dayStemIndex = (daysDiff + 6) % 10;
-        const dayBranchIndex = (daysDiff + 8) % 12;
-        
-        // Calculate Hour Pillar (时柱)
-        const hourBranchIndex = Math.floor((hour + 1) / 2) % 12;
-        const hourStemIndex = (dayStemIndex * 2 + hourBranchIndex) % 10;
+        // Import lunar-javascript dynamically for Deno
+        // Using CDN version compatible with Deno
+        const { Lunar } = await import('https://esm.sh/lunar-javascript@1.6.14');
 
-        // Get element for each stem
+        // Create Solar date and convert to Lunar with Bazi
+        const solar = Lunar.Solar.fromYmdHms(year, month, day, hour, minute, 0);
+        const lunar = solar.getLunar();
+        const eightChar = lunar.getEightChar();
+
+        // Get four pillars
+        const yearGanZhi = eightChar.getYear();
+        const monthGanZhi = eightChar.getMonth();
+        const dayGanZhi = eightChar.getDay();
+        const hourGanZhi = eightChar.getTime();
+
+        // Element mapping for English output
         const getElement = (stem: string): string => {
           const stemElements: Record<string, string> = {
             '甲': 'Wood', '乙': 'Wood',
@@ -85,7 +77,6 @@ Deno.serve(async (req) => {
           return stemElements[stem] || 'Earth';
         };
 
-        // Get element for branches (main Qi)
         const getBranchElement = (branch: string): string => {
           const branchElements: Record<string, string> = {
             '子': 'Water', '丑': 'Earth', '寅': 'Wood', '卯': 'Wood',
@@ -95,14 +86,15 @@ Deno.serve(async (req) => {
           return branchElements[branch] || 'Earth';
         };
 
-        const yearStem = heavenlyStems[yearStemIndex];
-        const yearBranch = earthlyBranches[yearBranchIndex];
-        const monthStem = heavenlyStems[monthStemIndex];
-        const monthBranch = earthlyBranches[monthBranchIndex];
-        const dayStem = heavenlyStems[dayStemIndex];
-        const dayBranch = earthlyBranches[dayBranchIndex];
-        const hourStem = heavenlyStems[hourStemIndex];
-        const hourBranch = earthlyBranches[hourBranchIndex];
+        // Extract stems and branches
+        const yearStem = yearGanZhi.charAt(0);
+        const yearBranch = yearGanZhi.charAt(1);
+        const monthStem = monthGanZhi.charAt(0);
+        const monthBranch = monthGanZhi.charAt(1);
+        const dayStem = dayGanZhi.charAt(0);
+        const dayBranch = dayGanZhi.charAt(1);
+        const hourStem = hourGanZhi.charAt(0);
+        const hourBranch = hourGanZhi.charAt(1);
 
         // Count elements for balance
         const elementBalance = { wood: 0, fire: 0, earth: 0, metal: 0, water: 0 };
@@ -221,7 +213,7 @@ Deno.serve(async (req) => {
 
     const hexagramData = (category === '梅花易数' || category === '综合占卜') ? calculateHexagram() : null;
     const qimenData = (category === '奇门遁甲' || category === '综合占卜') && birthData.day ? calculateQimen() : null;
-    const baziData = calculateBaziTraditional();
+    const baziData = await calculateBaziTraditional();
 
     // Build system prompt based on category
     const systemPrompts = {
