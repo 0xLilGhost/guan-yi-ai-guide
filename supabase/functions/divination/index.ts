@@ -19,7 +19,6 @@ interface DivinationRequest {
     number1?: number;
     number2?: number;
   };
-  language?: string;
 }
 
 Deno.serve(async (req) => {
@@ -28,7 +27,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { category, question, birthData, divineData, language }: DivinationRequest = await req.json();
+    const { category, question, birthData, divineData }: DivinationRequest = await req.json();
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
 
     if (!LOVABLE_API_KEY) {
@@ -36,166 +35,6 @@ Deno.serve(async (req) => {
     }
 
     console.log('Divination request:', { category, question, hasBirthData: !!birthData.year, divineMethod: divineData?.method });
-
-    // Traditional Bazi calculation using lunar-javascript (6tail)
-    const calculateBaziTraditional = async () => {
-      if (!birthData.year || !birthData.month || !birthData.day) {
-        return null;
-      }
-
-      try {
-        const year = parseInt(birthData.year);
-        const month = parseInt(birthData.month);
-        const day = parseInt(birthData.day);
-        const hour = birthData.hour ? parseInt(birthData.hour) : 12;
-        const minute = birthData.minute ? parseInt(birthData.minute) : 0;
-
-        // Import lunar-javascript dynamically for Deno
-        const { Lunar } = await import('https://esm.sh/lunar-javascript@1.6.14');
-
-        // Create Solar date and convert to Lunar with Bazi
-        const solar = Lunar.Solar.fromYmdHms(year, month, day, hour, minute, 0);
-        const lunar = solar.getLunar();
-        const eightChar = lunar.getEightChar();
-
-        // Get four pillars
-        const yearGanZhi = eightChar.getYear();
-        const monthGanZhi = eightChar.getMonth();
-        const dayGanZhi = eightChar.getDay();
-        const hourGanZhi = eightChar.getTime();
-
-        // Element mapping
-        const getElement = (stem: string): string => {
-          const stemElements: Record<string, string> = {
-            '甲': 'Wood', '乙': 'Wood',
-            '丙': 'Fire', '丁': 'Fire',
-            '戊': 'Earth', '己': 'Earth',
-            '庚': 'Metal', '辛': 'Metal',
-            '壬': 'Water', '癸': 'Water'
-          };
-          return stemElements[stem] || 'Earth';
-        };
-
-        const getBranchElement = (branch: string): string => {
-          const branchElements: Record<string, string> = {
-            '子': 'Water', '丑': 'Earth', '寅': 'Wood', '卯': 'Wood',
-            '辰': 'Earth', '巳': 'Fire', '午': 'Fire', '未': 'Earth',
-            '申': 'Metal', '酉': 'Metal', '戌': 'Earth', '亥': 'Water'
-          };
-          return branchElements[branch] || 'Earth';
-        };
-
-        // Extract stems and branches
-        const yearStem = yearGanZhi.charAt(0);
-        const yearBranch = yearGanZhi.charAt(1);
-        const monthStem = monthGanZhi.charAt(0);
-        const monthBranch = monthGanZhi.charAt(1);
-        const dayStem = dayGanZhi.charAt(0);
-        const dayBranch = dayGanZhi.charAt(1);
-        const hourStem = hourGanZhi.charAt(0);
-        const hourBranch = hourGanZhi.charAt(1);
-
-        // Get 十神 (ShiShen - Ten Gods)
-        const yearShiShen = eightChar.getYearShiShenGan();
-        const monthShiShen = eightChar.getMonthShiShenGan();
-        const dayShiShen = '元女'; // Day master is self
-        const hourShiShen = eightChar.getTimeShiShenGan();
-
-        // Get 藏干 (Hidden Stems in Earthly Branches)
-        const yearHiddenStems = eightChar.getYearHideGan();
-        const monthHiddenStems = eightChar.getMonthHideGan();
-        const dayHiddenStems = eightChar.getDayHideGan();
-        const hourHiddenStems = eightChar.getTimeHideGan();
-
-        // Get 十二长生 (Twelve Growth Phases)
-        const yearGrowth = eightChar.getYearShengXiao();
-        const monthGrowth = eightChar.getMonthShengXiao(); 
-        const dayGrowth = eightChar.getDayShengXiao();
-        const hourGrowth = eightChar.getTimeShengXiao();
-
-        // Get 纳音 (NaYin - Sound of Elements)
-        const yearNaYin = eightChar.getYearNaYin();
-        const monthNaYin = eightChar.getMonthNaYin();
-        const dayNaYin = eightChar.getDayNaYin();
-        const hourNaYin = eightChar.getTimeNaYin();
-
-        // Get 神煞 (Shen Sha - Spiritual Influences)
-        const yearShenSha = eightChar.getYearShenSha();
-        const monthShenSha = eightChar.getMonthShenSha();
-        const dayShenSha = eightChar.getDayShenSha();
-        const hourShenSha = eightChar.getTimeShenSha();
-
-        // Get 空亡 (Kong Wang - Void)
-        const kongWang = eightChar.getKongWang();
-
-        // Count elements for balance
-        const elementBalance = { wood: 0, fire: 0, earth: 0, metal: 0, water: 0 };
-        const addElement = (element: string) => {
-          const key = element.toLowerCase() as keyof typeof elementBalance;
-          if (key in elementBalance) {
-            elementBalance[key]++;
-          }
-        };
-
-        addElement(getElement(yearStem));
-        addElement(getBranchElement(yearBranch));
-        addElement(getElement(monthStem));
-        addElement(getBranchElement(monthBranch));
-        addElement(getElement(dayStem));
-        addElement(getBranchElement(dayBranch));
-        addElement(getElement(hourStem));
-        addElement(getBranchElement(hourBranch));
-
-        return {
-          year: {
-            heavenlyStem: yearStem,
-            earthlyBranch: yearBranch,
-            element: getElement(yearStem),
-            shiShen: yearShiShen,
-            hiddenStems: yearHiddenStems,
-            growth: yearGrowth,
-            naYin: yearNaYin,
-            shenSha: yearShenSha
-          },
-          month: {
-            heavenlyStem: monthStem,
-            earthlyBranch: monthBranch,
-            element: getElement(monthStem),
-            shiShen: monthShiShen,
-            hiddenStems: monthHiddenStems,
-            growth: monthGrowth,
-            naYin: monthNaYin,
-            shenSha: monthShenSha
-          },
-          day: {
-            heavenlyStem: dayStem,
-            earthlyBranch: dayBranch,
-            element: getElement(dayStem),
-            shiShen: dayShiShen,
-            hiddenStems: dayHiddenStems,
-            growth: dayGrowth,
-            naYin: dayNaYin,
-            shenSha: dayShenSha
-          },
-          hour: {
-            heavenlyStem: hourStem,
-            earthlyBranch: hourBranch,
-            element: getElement(hourStem),
-            shiShen: hourShiShen,
-            hiddenStems: hourHiddenStems,
-            growth: hourGrowth,
-            naYin: hourNaYin,
-            shenSha: hourShenSha
-          },
-          dayMaster: dayStem,
-          elementBalance,
-          kongWang
-        };
-      } catch (error) {
-        console.error('Bazi calculation error:', error);
-        return null;
-      }
-    };
 
     // 计算真实的梅花易数卦象
     const calculateHexagram = () => {
@@ -262,10 +101,8 @@ Deno.serve(async (req) => {
       };
     };
 
-
     const hexagramData = (category === '梅花易数' || category === '综合占卜') ? calculateHexagram() : null;
     const qimenData = (category === '奇门遁甲' || category === '综合占卜') && birthData.day ? calculateQimen() : null;
-    const baziData = await calculateBaziTraditional();
 
     // Build system prompt based on category
     const systemPrompts = {
@@ -328,25 +165,13 @@ Deno.serve(async (req) => {
       userPrompt += `（用户未提供生辰信息，请基于问题本身和通用规律进行分析）\n\n`;
     }
 
-    // 如果有真实计算的卦象、八字和奇门数据，加入到用户提示中
-    if (baziData) {
-      userPrompt += `\n真实八字排盘：\n- 年柱：${baziData.year.heavenlyStem}${baziData.year.earthlyBranch}（${baziData.year.element}）\n- 月柱：${baziData.month.heavenlyStem}${baziData.month.earthlyBranch}（${baziData.month.element}）\n- 日柱：${baziData.day.heavenlyStem}${baziData.day.earthlyBranch}（${baziData.day.element}）\n- 时柱：${baziData.hour.heavenlyStem}${baziData.hour.earthlyBranch}（${baziData.hour.element}）\n- 日主：${baziData.dayMaster}\n- 五行分布：木${baziData.elementBalance.wood} 火${baziData.elementBalance.fire} 土${baziData.elementBalance.earth} 金${baziData.elementBalance.metal} 水${baziData.elementBalance.water}\n请基于此八字进行解读。\n`;
-    }
+    // 如果有真实计算的卦象和奇门数据，加入到用户提示中
     if (hexagramData) {
       userPrompt += `\n真实卦象数据：\n- 本卦：${hexagramData.upper}上${hexagramData.lower}下\n- 变爻：第${hexagramData.changing}爻\n- 变卦：${hexagramData.result}\n请基于此卦象进行解读。\n`;
     }
     if (qimenData) {
       userPrompt += `\n真实奇门盘局：\n- 宫位：${qimenData.palace}\n- 值使门：${qimenData.gate}\n- 值符星：${qimenData.star}\n- 吉方：${qimenData.direction}\n请基于此盘局进行解读。\n`;
     }
-
-    // Build visualData for AI response
-    const visualDataInstruction = {
-      bazi: baziData,
-      hexagram: hexagramData,
-      qimen: qimenData,
-      ziwei: (category === '情感婚姻' || category === '事业运势' || category === '综合占卜') && birthData.year ? 'generate' : null,
-      fengshui: (category === '风水布局' || category === '综合占卜') ? 'generate' : null
-    };
 
     userPrompt += `请按以下结构输出结果（使用JSON格式）：
 {
@@ -360,11 +185,35 @@ Deno.serve(async (req) => {
   ],
   "probability": "准确度评估（如：参考度 75-80%）",
   "visualData": {
-    "bazi": ${baziData ? '已提供真实数据' : 'null'},
-    "hexagram": ${hexagramData ? '已提供真实数据' : 'null'},
-    "qimen": ${qimenData ? '已提供真实数据' : 'null'},
-    "ziwei": ${visualDataInstruction.ziwei === 'generate' ? '{"mainStar":"主星名称","palace":"命宫位置","keyPalaces":{"career":"官禄宫信息","wealth":"财帛宫信息","relationship":"夫妻宫信息","health":"疾厄宫信息"}}' : 'null'},
-    "fengshui": ${visualDataInstruction.fengshui === 'generate' ? '{"favorableDirection":["吉方1","吉方2"],"unfavorableDirection":["凶方"],"suggestions":{"color":"颜色建议","element":"五行建议","placement":"摆设建议"}}' : 'null'}
+    "bazi": ${birthData.year && birthData.month && birthData.day ? `{
+      "year": { "heavenlyStem": "年干", "earthlyBranch": "年支", "element": "年柱五行" },
+      "month": { "heavenlyStem": "月干", "earthlyBranch": "月支", "element": "月柱五行" },
+      "day": { "heavenlyStem": "日干", "earthlyBranch": "日支", "element": "日柱五行" },
+      "hour": { "heavenlyStem": "时干", "earthlyBranch": "时支", "element": "时柱五行" },
+      "dayMaster": "日主五行",
+      "elementBalance": { "wood": 数值, "fire": 数值, "earth": 数值, "metal": 数值, "water": 数值 }
+    }` : 'null'},
+    "hexagram": ${hexagramData ? JSON.stringify(hexagramData) : 'null'},
+    "qimen": ${qimenData ? JSON.stringify(qimenData) : 'null'},
+    "ziwei": ${(category === '情感婚姻' || category === '事业运势' || category === '综合占卜') && birthData.year ? `{
+      "mainStar": "主星（紫微/天机/太阳/武曲/天同/廉贞等）",
+      "palace": "命宫位置",
+      "keyPalaces": {
+        "career": "官禄宫主星及吉凶",
+        "wealth": "财帛宫主星及吉凶",
+        "relationship": "夫妻宫主星及吉凶",
+        "health": "疾厄宫主星及吉凶"
+      }
+    }` : 'null'},
+    "fengshui": ${category === '风水布局' || category === '综合占卜' ? `{
+      "favorableDirection": ["东方", "南方"],
+      "unfavorableDirection": ["西北方"],
+      "suggestions": {
+        "color": "建议颜色（如：青色、绿色）",
+        "element": "补充五行（如：木、火）",
+        "placement": "重要摆设建议（100字以内）"
+      }
+    }` : 'null'}
   }
 }
 
@@ -374,7 +223,7 @@ Deno.serve(async (req) => {
 3. 解释清楚推演过程，让用户理解逻辑
 4. 语言要专业但易懂，避免过于玄虚
 5. 必须返回有效的JSON格式
-6. visualData中，已提供真实数据的项目直接标注"已提供真实数据"，需要生成的项目按示例格式填写`;
+6. visualData中根据类别和生辰信息生成真实的术数推演数据，如果无法生成则对应项设为null`;
 
     // Call AI
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
@@ -411,16 +260,6 @@ Deno.serve(async (req) => {
       const jsonMatch = aiMessage.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         result = JSON.parse(jsonMatch[0]);
-        
-        // Ensure visualData exists before injecting real calculated data
-        if (!result.visualData) {
-          result.visualData = {};
-        }
-        
-        // Inject real calculated data (always override AI-generated data)
-        if (baziData) result.visualData.bazi = baziData;
-        if (hexagramData) result.visualData.hexagram = hexagramData;
-        if (qimenData) result.visualData.qimen = qimenData;
       } else {
         // If no JSON found, create structured response from text
         result = {
