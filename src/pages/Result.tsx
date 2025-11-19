@@ -99,7 +99,16 @@ const Result = () => {
           )}
 
           {result.visualData?.hexagram && (
-            <HexagramDisplay data={result.visualData.hexagram} />
+            <HexagramDisplay
+              data={{
+                ...result.visualData.hexagram,
+                result:
+                  typeof result.visualData.hexagram.result === "string" &&
+                  result.visualData.hexagram.result.length >= 2
+                    ? result.visualData.hexagram.result
+                    : `${result.visualData.hexagram.upper}${result.visualData.hexagram.lower}`,
+              }}
+            />
           )}
 
           {result.visualData?.qimen && (
