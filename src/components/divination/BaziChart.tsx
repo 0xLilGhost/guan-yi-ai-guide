@@ -118,7 +118,7 @@ export const BaziChart = ({ data }: { data: BaziData }) => {
               </TooltipTrigger>
               <TooltipContent>日柱天干，代表命主自身的五行属性</TooltipContent>
             </Tooltip>
-            <div className="text-2xl font-bold text-accent">{data.dayMaster}</div>
+            <div className="text-2xl font-bold text-accent">{elementNames[data.dayMaster.toLowerCase()] || data.dayMaster}</div>
           </div>
         </div>
 
