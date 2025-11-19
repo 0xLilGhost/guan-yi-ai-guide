@@ -99,7 +99,7 @@ export const BaziChart = ({ data }: { data: BaziData }) => {
                   color: elementColors[pillar.data.element.toLowerCase()] || elementColors.earth
                 }}
               >
-                {pillar.data.element}
+                {elementNames[pillar.data.element.toLowerCase()] || pillar.data.element}
               </div>
             </div>
           ))}
