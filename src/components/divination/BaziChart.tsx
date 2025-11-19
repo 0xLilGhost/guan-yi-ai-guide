@@ -64,45 +64,63 @@ export const BaziChart = ({ data }: { data: BaziData }) => {
         
         {/* Four Pillars */}
         <div className="grid grid-cols-4 gap-2 mb-6">
-          {pillars.filter(pillar => pillar.data !== null).map((pillar, index) => (
-            <div key={index} className="text-center">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="text-xs text-muted-foreground mb-2 cursor-help">{pillar.name}</div>
-                </TooltipTrigger>
-                <TooltipContent>{pillar.tooltip}</TooltipContent>
-              </Tooltip>
-              <div className="space-y-1">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div className="bg-accent/10 border border-accent/30 rounded-lg p-2 cursor-help">
-                      <div className="text-lg font-bold text-accent">{pillar.data!.heavenlyStem}</div>
-                      <div className="text-[10px] text-muted-foreground">天干</div>
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent>天干：代表天时、外在表现、主动性</TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div className="bg-accent/10 border border-accent/30 rounded-lg p-2 cursor-help">
-                      <div className="text-lg font-bold text-accent">{pillar.data!.earthlyBranch}</div>
-                      <div className="text-[10px] text-muted-foreground">地支</div>
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent>地支：代表地利、内在本质、被动性</TooltipContent>
-                </Tooltip>
-              </div>
-              <div 
-                className="mt-1 text-xs font-semibold px-2 py-0.5 rounded-full inline-block"
-                style={{ 
-                  backgroundColor: `${elementColors[pillar.data!.element.toLowerCase()] || elementColors.earth}20`,
-                  color: elementColors[pillar.data!.element.toLowerCase()] || elementColors.earth
-                }}
-              >
-                {pillar.data!.element}
-              </div>
-            </div>
-          ))}
+          {pillars
+            .filter((pillar) => {
+              const d = pillar.data as BaziPillar | null | undefined;
+              return (
+                !!d &&
+                typeof d.heavenlyStem === "string" &&
+                typeof d.earthlyBranch === "string" &&
+                typeof d.element === "string"
+              );
+            })
+            .map((pillar, index) => {
+              const d = pillar.data as BaziPillar;
+              const elementKey = (d.element || "").toLowerCase() as keyof typeof elementColors;
+              const color = elementColors[elementKey] || elementColors.earth;
+
+              return (
+                <div key={index} className="text-center">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="text-xs text-muted-foreground mb-2 cursor-help">
+                        {pillar.name}
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>{pillar.tooltip}</TooltipContent>
+                  </Tooltip>
+                  <div className="space-y-1">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="bg-accent/10 border border-accent/30 rounded-lg p-2 cursor-help">
+                          <div className="text-lg font-bold text-accent">{d.heavenlyStem}</div>
+                          <div className="text-[10px] text-muted-foreground">天干</div>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>天干：代表天时、外在表现、主动性</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="bg-accent/10 border border-accent/30 rounded-lg p-2 cursor-help">
+                          <div className="text-lg font-bold text-accent">{d.earthlyBranch}</div>
+                          <div className="text-[10px] text-muted-foreground">地支</div>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>地支：代表地利、内在本质、被动性</TooltipContent>
+                    </Tooltip>
+                  </div>
+                  <div
+                    className="mt-1 text-xs font-semibold px-2 py-0.5 rounded-full inline-block"
+                    style={{
+                      backgroundColor: `${color}20`,
+                      color,
+                    }}
+                  >
+                    {d.element}
+                  </div>
+                </div>
+              );
+            })}
         </div>
 
         {/* Day Master */}
