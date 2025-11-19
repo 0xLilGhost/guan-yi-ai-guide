@@ -360,12 +360,15 @@ Deno.serve(async (req) => {
       if (jsonMatch) {
         result = JSON.parse(jsonMatch[0]);
         
-        // Inject real calculated data
-        if (result.visualData) {
-          if (baziData) result.visualData.bazi = baziData;
-          if (hexagramData) result.visualData.hexagram = hexagramData;
-          if (qimenData) result.visualData.qimen = qimenData;
+        // Ensure visualData exists before injecting real calculated data
+        if (!result.visualData) {
+          result.visualData = {};
         }
+        
+        // Inject real calculated data (always override AI-generated data)
+        if (baziData) result.visualData.bazi = baziData;
+        if (hexagramData) result.visualData.hexagram = hexagramData;
+        if (qimenData) result.visualData.qimen = qimenData;
       } else {
         // If no JSON found, create structured response from text
         result = {
