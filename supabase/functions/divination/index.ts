@@ -51,7 +51,6 @@ Deno.serve(async (req) => {
         const minute = birthData.minute ? parseInt(birthData.minute) : 0;
 
         // Import lunar-javascript dynamically for Deno
-        // Using CDN version compatible with Deno
         const { Lunar } = await import('https://esm.sh/lunar-javascript@1.6.14');
 
         // Create Solar date and convert to Lunar with Bazi
@@ -65,7 +64,7 @@ Deno.serve(async (req) => {
         const dayGanZhi = eightChar.getDay();
         const hourGanZhi = eightChar.getTime();
 
-        // Element mapping for English output
+        // Element mapping
         const getElement = (stem: string): string => {
           const stemElements: Record<string, string> = {
             '甲': 'Wood', '乙': 'Wood',
@@ -96,9 +95,41 @@ Deno.serve(async (req) => {
         const hourStem = hourGanZhi.charAt(0);
         const hourBranch = hourGanZhi.charAt(1);
 
+        // Get 十神 (ShiShen - Ten Gods)
+        const yearShiShen = eightChar.getYearShiShenGan();
+        const monthShiShen = eightChar.getMonthShiShenGan();
+        const dayShiShen = '元女'; // Day master is self
+        const hourShiShen = eightChar.getTimeShiShenGan();
+
+        // Get 藏干 (Hidden Stems in Earthly Branches)
+        const yearHiddenStems = eightChar.getYearHideGan();
+        const monthHiddenStems = eightChar.getMonthHideGan();
+        const dayHiddenStems = eightChar.getDayHideGan();
+        const hourHiddenStems = eightChar.getTimeHideGan();
+
+        // Get 十二长生 (Twelve Growth Phases)
+        const yearGrowth = eightChar.getYearShengXiao();
+        const monthGrowth = eightChar.getMonthShengXiao(); 
+        const dayGrowth = eightChar.getDayShengXiao();
+        const hourGrowth = eightChar.getTimeShengXiao();
+
+        // Get 纳音 (NaYin - Sound of Elements)
+        const yearNaYin = eightChar.getYearNaYin();
+        const monthNaYin = eightChar.getMonthNaYin();
+        const dayNaYin = eightChar.getDayNaYin();
+        const hourNaYin = eightChar.getTimeNaYin();
+
+        // Get 神煞 (Shen Sha - Spiritual Influences)
+        const yearShenSha = eightChar.getYearShenSha();
+        const monthShenSha = eightChar.getMonthShenSha();
+        const dayShenSha = eightChar.getDayShenSha();
+        const hourShenSha = eightChar.getTimeShenSha();
+
+        // Get 空亡 (Kong Wang - Void)
+        const kongWang = eightChar.getKongWang();
+
         // Count elements for balance
         const elementBalance = { wood: 0, fire: 0, earth: 0, metal: 0, water: 0 };
-        
         const addElement = (element: string) => {
           const key = element.toLowerCase() as keyof typeof elementBalance;
           if (key in elementBalance) {
@@ -119,25 +150,46 @@ Deno.serve(async (req) => {
           year: {
             heavenlyStem: yearStem,
             earthlyBranch: yearBranch,
-            element: getElement(yearStem)
+            element: getElement(yearStem),
+            shiShen: yearShiShen,
+            hiddenStems: yearHiddenStems,
+            growth: yearGrowth,
+            naYin: yearNaYin,
+            shenSha: yearShenSha
           },
           month: {
             heavenlyStem: monthStem,
             earthlyBranch: monthBranch,
-            element: getElement(monthStem)
+            element: getElement(monthStem),
+            shiShen: monthShiShen,
+            hiddenStems: monthHiddenStems,
+            growth: monthGrowth,
+            naYin: monthNaYin,
+            shenSha: monthShenSha
           },
           day: {
             heavenlyStem: dayStem,
             earthlyBranch: dayBranch,
-            element: getElement(dayStem)
+            element: getElement(dayStem),
+            shiShen: dayShiShen,
+            hiddenStems: dayHiddenStems,
+            growth: dayGrowth,
+            naYin: dayNaYin,
+            shenSha: dayShenSha
           },
           hour: {
             heavenlyStem: hourStem,
             earthlyBranch: hourBranch,
-            element: getElement(hourStem)
+            element: getElement(hourStem),
+            shiShen: hourShiShen,
+            hiddenStems: hourHiddenStems,
+            growth: hourGrowth,
+            naYin: hourNaYin,
+            shenSha: hourShenSha
           },
           dayMaster: dayStem,
-          elementBalance
+          elementBalance,
+          kongWang
         };
       } catch (error) {
         console.error('Bazi calculation error:', error);

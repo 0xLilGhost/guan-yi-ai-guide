@@ -5,6 +5,11 @@ interface BaziPillar {
   heavenlyStem: string;
   earthlyBranch: string;
   element: string;
+  shiShen?: string;
+  hiddenStems?: string[];
+  growth?: string;
+  naYin?: string;
+  shenSha?: string[];
 }
 
 interface BaziData {
@@ -13,6 +18,7 @@ interface BaziData {
   day: BaziPillar | null;
   hour: BaziPillar | null;
   dayMaster: string;
+  kongWang?: string;
   elementBalance?: {
     wood: number;
     fire: number;
@@ -30,20 +36,26 @@ const elementColors: Record<string, string> = {
   water: "hsl(210, 70%, 55%)",
 };
 
-const elementNames: Record<string, string> = {
-  wood: "木",
-  fire: "火",
-  earth: "土",
-  metal: "金",
-  water: "水",
+const elementEmojis: Record<string, string> = {
+  wood: "🌳",
+  fire: "🔥",
+  earth: "⛰️",
+  metal: "🔱",
+  water: "💧",
 };
 
-const elementChineseNames: Record<string, string> = {
-  wood: "木",
-  fire: "火",
-  earth: "土",
-  metal: "金",
-  water: "水",
+const stemToElement: Record<string, string> = {
+  "甲": "wood", "乙": "wood",
+  "丙": "fire", "丁": "fire",
+  "戊": "earth", "己": "earth",
+  "庚": "metal", "辛": "metal",
+  "壬": "water", "癸": "water",
+};
+
+const branchToElement: Record<string, string> = {
+  "子": "water", "丑": "earth", "寅": "wood", "卯": "wood",
+  "辰": "earth", "巳": "fire", "午": "fire", "未": "earth",
+  "申": "metal", "酉": "metal", "戌": "earth", "亥": "water",
 };
 
 export const BaziChart = ({ data }: { data: BaziData }) => {
@@ -59,252 +71,333 @@ export const BaziChart = ({ data }: { data: BaziData }) => {
     return (
       !!d &&
       typeof d.heavenlyStem === "string" &&
-      typeof d.earthlyBranch === "string" &&
-      typeof d.element === "string"
+      typeof d.earthlyBranch === "string"
     );
   });
 
-  const maxValue = data.elementBalance ? Math.max(...Object.values(data.elementBalance)) : 0;
+  const getStemColor = (stem: string) => {
+    const element = stemToElement[stem] || "earth";
+    return elementColors[element];
+  };
 
-  // Calculate dominant and weak elements
-  const elementAnalysis = data.elementBalance
-    ? Object.entries(data.elementBalance)
-        .map(([element, count]) => ({
-          element,
-          count,
-          name: elementChineseNames[element],
-          color: elementColors[element],
-        }))
-        .sort((a, b) => b.count - a.count)
-    : [];
+  const getBranchColor = (branch: string) => {
+    const element = branchToElement[branch] || "earth";
+    return elementColors[element];
+  };
 
-  const dominantElement = elementAnalysis[0];
-  const weakElement = elementAnalysis[elementAnalysis.length - 1];
+  const getStemEmoji = (stem: string) => {
+    const element = stemToElement[stem] || "earth";
+    return elementEmojis[element];
+  };
+
+  const getBranchEmoji = (branch: string) => {
+    const element = branchToElement[branch] || "earth";
+    return elementEmojis[element];
+  };
 
   return (
     <TooltipProvider>
-      <Card className="p-6 bg-card/80 backdrop-blur-sm border-accent/20 max-w-4xl mx-auto space-y-6">
+      <Card className="p-6 bg-card/80 backdrop-blur-sm border-accent/20 max-w-5xl mx-auto space-y-4">
         <Tooltip>
           <TooltipTrigger asChild>
             <h2 className="text-2xl font-bold text-accent border-b-2 border-accent/30 pb-3 cursor-help">
-              八字命盘
+              八字命盘详解
             </h2>
           </TooltipTrigger>
           <TooltipContent className="max-w-xs">
-            八字命盘：根据出生年月日时排出的四柱八字，用于分析命运格局
+            八字命盘：根据出生年月日时排出的完整四柱命盘，含十神、藏干、纳音、神煞等
           </TooltipContent>
         </Tooltip>
 
-        {/* Traditional Bazi Table Layout */}
-        <div className="bg-gradient-to-br from-accent/5 to-accent/10 rounded-xl p-4 border border-accent/20">
-          <div className="grid grid-cols-5 gap-3">
-            {/* Header Row */}
-            <div className="text-center">
-              <div className="text-sm font-semibold text-muted-foreground mb-2">四柱</div>
-            </div>
-            {validPillars.map((pillar, index) => (
-              <Tooltip key={index}>
-                <TooltipTrigger asChild>
-                  <div className="text-center cursor-help">
-                    <div className="text-sm font-semibold text-accent mb-2">{pillar.name}</div>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>{pillar.tooltip}</TooltipContent>
-              </Tooltip>
-            ))}
+        {/* Main Bazi Table */}
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse">
+            <tbody>
+              {/* Header Row - 日期 */}
+              <tr className="border-b border-accent/20">
+                <td className="p-2 text-sm text-muted-foreground font-medium w-20">日期</td>
+                {validPillars.map((pillar, index) => (
+                  <Tooltip key={index}>
+                    <TooltipTrigger asChild>
+                      <td className="p-2 text-center font-semibold text-accent cursor-help">
+                        {pillar.name}
+                      </td>
+                    </TooltipTrigger>
+                    <TooltipContent>{pillar.tooltip}</TooltipContent>
+                  </Tooltip>
+                ))}
+              </tr>
 
-            {/* Heavenly Stems Row */}
-            <div className="flex items-center justify-center">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="text-xs text-muted-foreground cursor-help font-medium">天干</div>
-                </TooltipTrigger>
-                <TooltipContent>天干：代表天时、外在表现、主动性</TooltipContent>
-              </Tooltip>
-            </div>
-            {validPillars.map((pillar, index) => {
-              const d = pillar.data as BaziPillar;
-              const elementKey = (d.element || "").toLowerCase() as keyof typeof elementColors;
-              const color = elementColors[elementKey] || elementColors.earth;
-              return (
-                <div
-                  key={index}
-                  className="bg-card border-2 rounded-lg p-3 flex flex-col items-center justify-center shadow-sm hover:shadow-md transition-shadow"
-                  style={{ borderColor: color }}
-                >
-                  <div className="text-2xl font-bold" style={{ color }}>
-                    {d.heavenlyStem}
-                  </div>
-                </div>
-              );
-            })}
+              {/* 主星 Row - ShiShen (Ten Gods) */}
+              <tr className="border-b border-accent/20 bg-accent/5">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <td className="p-2 text-sm text-muted-foreground font-medium cursor-help">主星</td>
+                  </TooltipTrigger>
+                  <TooltipContent>十神：代表与日主的关系，判断六亲、性格、事业等</TooltipContent>
+                </Tooltip>
+                {validPillars.map((pillar, index) => {
+                  const d = pillar.data as BaziPillar;
+                  return (
+                    <td key={index} className="p-2 text-center font-bold text-accent">
+                      {d.shiShen || ""}
+                    </td>
+                  );
+                })}
+              </tr>
 
-            {/* Earthly Branches Row */}
-            <div className="flex items-center justify-center">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="text-xs text-muted-foreground cursor-help font-medium">地支</div>
-                </TooltipTrigger>
-                <TooltipContent>地支：代表地利、内在本质、被动性</TooltipContent>
-              </Tooltip>
-            </div>
-            {validPillars.map((pillar, index) => {
-              const d = pillar.data as BaziPillar;
-              const elementKey = (d.element || "").toLowerCase() as keyof typeof elementColors;
-              const color = elementColors[elementKey] || elementColors.earth;
-              return (
-                <div
-                  key={index}
-                  className="bg-card border-2 rounded-lg p-3 flex flex-col items-center justify-center shadow-sm hover:shadow-md transition-shadow"
-                  style={{ borderColor: color }}
-                >
-                  <div className="text-2xl font-bold" style={{ color }}>
-                    {d.earthlyBranch}
-                  </div>
-                </div>
-              );
-            })}
+              {/* 天干 Row - Heavenly Stems */}
+              <tr className="border-b border-accent/20">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <td className="p-2 text-sm text-muted-foreground font-medium cursor-help">天干</td>
+                  </TooltipTrigger>
+                  <TooltipContent>天干：代表天时、外在表现、主动性</TooltipContent>
+                </Tooltip>
+                {validPillars.map((pillar, index) => {
+                  const d = pillar.data as BaziPillar;
+                  const color = getStemColor(d.heavenlyStem);
+                  const emoji = getStemEmoji(d.heavenlyStem);
+                  return (
+                    <td key={index} className="p-2 text-center">
+                      <div className="flex items-center justify-center gap-1">
+                        <span className="text-2xl font-bold" style={{ color }}>
+                          {d.heavenlyStem}
+                        </span>
+                        <span className="text-lg">{emoji}</span>
+                      </div>
+                    </td>
+                  );
+                })}
+              </tr>
 
-            {/* Elements Row */}
-            <div className="flex items-center justify-center">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="text-xs text-muted-foreground cursor-help font-medium">五行</div>
-                </TooltipTrigger>
-                <TooltipContent>五行：金木水火土，代表五种基本能量属性</TooltipContent>
-              </Tooltip>
-            </div>
-            {validPillars.map((pillar, index) => {
-              const d = pillar.data as BaziPillar;
-              const elementKey = (d.element || "").toLowerCase() as keyof typeof elementColors;
-              const color = elementColors[elementKey] || elementColors.earth;
-              return (
-                <div
-                  key={index}
-                  className="rounded-lg p-2 flex items-center justify-center text-xs font-semibold"
-                  style={{
-                    backgroundColor: `${color}20`,
-                    color: color,
-                  }}
-                >
-                  {d.element}
-                </div>
-              );
-            })}
-          </div>
+              {/* 地支 Row - Earthly Branches */}
+              <tr className="border-b border-accent/20">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <td className="p-2 text-sm text-muted-foreground font-medium cursor-help">地支</td>
+                  </TooltipTrigger>
+                  <TooltipContent>地支：代表地利、内在本质、被动性</TooltipContent>
+                </Tooltip>
+                {validPillars.map((pillar, index) => {
+                  const d = pillar.data as BaziPillar;
+                  const color = getBranchColor(d.earthlyBranch);
+                  const emoji = getBranchEmoji(d.earthlyBranch);
+                  return (
+                    <td key={index} className="p-2 text-center">
+                      <div className="flex items-center justify-center gap-1">
+                        <span className="text-2xl font-bold" style={{ color }}>
+                          {d.earthlyBranch}
+                        </span>
+                        <span className="text-lg">{emoji}</span>
+                      </div>
+                    </td>
+                  );
+                })}
+              </tr>
+
+              {/* 藏干 Row - Hidden Stems */}
+              {validPillars.some((p) => (p.data as BaziPillar).hiddenStems) && (
+                <tr className="border-b border-accent/20 bg-accent/5">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <td className="p-2 text-sm text-muted-foreground font-medium cursor-help">藏干</td>
+                    </TooltipTrigger>
+                    <TooltipContent>地支藏干：地支中所藏的天干，影响内在特质</TooltipContent>
+                  </Tooltip>
+                  {validPillars.map((pillar, index) => {
+                    const d = pillar.data as BaziPillar;
+                    const hiddenStems = d.hiddenStems || [];
+                    return (
+                      <td key={index} className="p-2 text-center">
+                        <div className="flex flex-col gap-0.5 text-xs">
+                          {hiddenStems.map((stem, i) => {
+                            const color = getStemColor(stem);
+                            const element = stemToElement[stem] || "earth";
+                            return (
+                              <div key={i} style={{ color }}>
+                                {stem}{element.charAt(0).toUpperCase()}{element.slice(1).substring(0, 2)}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </td>
+                    );
+                  })}
+                </tr>
+              )}
+
+              {/* 副星 Row - Secondary ShiShen */}
+              {validPillars.some((p) => (p.data as BaziPillar).hiddenStems) && (
+                <tr className="border-b border-accent/20">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <td className="p-2 text-sm text-muted-foreground font-medium cursor-help">副星</td>
+                    </TooltipTrigger>
+                    <TooltipContent>地支藏干对应的十神关系</TooltipContent>
+                  </Tooltip>
+                  {validPillars.map((pillar, index) => {
+                    const d = pillar.data as BaziPillar;
+                    return (
+                      <td key={index} className="p-2 text-center text-xs text-muted-foreground">
+                        {/* This would need to be calculated based on hidden stems */}
+                      </td>
+                    );
+                  })}
+                </tr>
+              )}
+
+              {/* 星运 Row - Growth Phase */}
+              {validPillars.some((p) => (p.data as BaziPillar).growth) && (
+                <tr className="border-b border-accent/20 bg-accent/5">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <td className="p-2 text-sm text-muted-foreground font-medium cursor-help">星运</td>
+                    </TooltipTrigger>
+                    <TooltipContent>十二长生：日主在各柱的生命状态（长生、沐浴、冠带等）</TooltipContent>
+                  </Tooltip>
+                  {validPillars.map((pillar, index) => {
+                    const d = pillar.data as BaziPillar;
+                    return (
+                      <td key={index} className="p-2 text-center text-sm">
+                        {d.growth || ""}
+                      </td>
+                    );
+                  })}
+                </tr>
+              )}
+
+              {/* 空亡 Row - Void */}
+              {data.kongWang && (
+                <tr className="border-b border-accent/20">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <td className="p-2 text-sm text-muted-foreground font-medium cursor-help">空亡</td>
+                    </TooltipTrigger>
+                    <TooltipContent>空亡：某些地支处于虚空状态，力量减弱</TooltipContent>
+                  </Tooltip>
+                  {validPillars.map((pillar, index) => {
+                    const d = pillar.data as BaziPillar;
+                    const isKongWang = data.kongWang?.includes(d.earthlyBranch);
+                    return (
+                      <td key={index} className="p-2 text-center text-sm">
+                        {isKongWang ? data.kongWang : ""}
+                      </td>
+                    );
+                  })}
+                </tr>
+              )}
+
+              {/* 纳音 Row - NaYin */}
+              {validPillars.some((p) => (p.data as BaziPillar).naYin) && (
+                <tr className="border-b border-accent/20 bg-accent/5">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <td className="p-2 text-sm text-muted-foreground font-medium cursor-help">纳音</td>
+                    </TooltipTrigger>
+                    <TooltipContent>纳音五行：干支组合产生的特殊五行属性（如海中金、山下火）</TooltipContent>
+                  </Tooltip>
+                  {validPillars.map((pillar, index) => {
+                    const d = pillar.data as BaziPillar;
+                    return (
+                      <td key={index} className="p-2 text-center text-sm">
+                        {d.naYin || ""}
+                      </td>
+                    );
+                  })}
+                </tr>
+              )}
+
+              {/* 神煞 Row - Spiritual Influences */}
+              {validPillars.some((p) => (p.data as BaziPillar).shenSha) && (
+                <tr className="border-b border-accent/20">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <td className="p-2 text-sm text-muted-foreground font-medium cursor-help">神煞</td>
+                    </TooltipTrigger>
+                    <TooltipContent>神煞：各种吉凶神煞，如天乙贵人、桃花、华盖等</TooltipContent>
+                  </Tooltip>
+                  {validPillars.map((pillar, index) => {
+                    const d = pillar.data as BaziPillar;
+                    const shenSha = d.shenSha || [];
+                    return (
+                      <td key={index} className="p-2 text-center">
+                        <div className="flex flex-col gap-0.5 text-xs text-muted-foreground max-h-24 overflow-y-auto">
+                          {shenSha.slice(0, 5).map((sha, i) => (
+                            <div key={i}>{sha}</div>
+                          ))}
+                        </div>
+                      </td>
+                    );
+                  })}
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
 
-        {/* Day Master Section */}
-        <div className="grid md:grid-cols-2 gap-4">
-          <div className="bg-gradient-to-br from-accent/10 to-accent/5 rounded-lg p-4 border-2 border-accent/30">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="text-sm text-muted-foreground mb-2 cursor-help font-medium">
-                  日主（命主五行）
-                </div>
-              </TooltipTrigger>
-              <TooltipContent className="max-w-xs">
-                日主：日柱天干，代表命主本人的五行属性，是八字分析的核心
-              </TooltipContent>
-            </Tooltip>
-            <div className="text-4xl font-bold text-accent text-center">{data.dayMaster}</div>
-          </div>
-
-          {dominantElement && (
-            <div className="bg-gradient-to-br from-accent/10 to-accent/5 rounded-lg p-4 border-2 border-accent/30">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="text-sm text-muted-foreground mb-2 cursor-help font-medium">五行强弱</div>
-                </TooltipTrigger>
-                <TooltipContent className="max-w-xs">
-                  统计八字中各五行出现次数，判断五行旺衰
-                </TooltipContent>
-              </Tooltip>
-              <div className="flex items-center justify-around text-center">
-                <div>
-                  <div className="text-xs text-muted-foreground mb-1">最旺</div>
-                  <div className="text-2xl font-bold" style={{ color: dominantElement.color }}>
-                    {dominantElement.name}
-                  </div>
-                  <div className="text-xs text-muted-foreground mt-1">{dominantElement.count}个</div>
-                </div>
-                <div className="w-px h-12 bg-accent/20"></div>
-                <div>
-                  <div className="text-xs text-muted-foreground mb-1">最弱</div>
-                  <div className="text-2xl font-bold" style={{ color: weakElement.color }}>
-                    {weakElement.name}
-                  </div>
-                  <div className="text-xs text-muted-foreground mt-1">{weakElement.count}个</div>
-                </div>
+        {/* Day Master Info */}
+        <div className="bg-gradient-to-br from-accent/10 to-accent/5 rounded-lg p-4 border-2 border-accent/30">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="text-sm text-muted-foreground mb-2 cursor-help font-medium text-center">
+                日主（命主本命）
               </div>
-            </div>
-          )}
+            </TooltipTrigger>
+            <TooltipContent className="max-w-xs">
+              日主：日柱天干，代表命主本人，是八字分析的核心基准
+            </TooltipContent>
+          </Tooltip>
+          <div className="flex items-center justify-center gap-2">
+            <span className="text-4xl font-bold" style={{ color: getStemColor(data.dayMaster) }}>
+              {data.dayMaster}
+            </span>
+            <span className="text-3xl">{getStemEmoji(data.dayMaster)}</span>
+          </div>
         </div>
 
-        {/* Five Elements Balance Chart */}
+        {/* Five Elements Balance */}
         {data.elementBalance && (
-          <div className="space-y-3">
+          <div className="space-y-3 pt-2">
             <Tooltip>
               <TooltipTrigger asChild>
                 <h3 className="text-lg font-semibold text-accent cursor-help flex items-center gap-2">
-                  五行分布图
+                  五行分布
                   <span className="text-xs text-muted-foreground font-normal">
                     （共{Object.values(data.elementBalance).reduce((a, b) => a + b, 0)}个）
                   </span>
                 </h3>
               </TooltipTrigger>
               <TooltipContent className="max-w-xs">
-                五行平衡：分析命局中金木水火土的数量分布，判断五行是否均衡
+                统计命局中金木水火土的数量分布，判断五行旺衰平衡
               </TooltipContent>
             </Tooltip>
-            <div className="space-y-3">
-              {elementAnalysis.map(({ element, count, name, color }) => (
-                <div key={element}>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <div className="flex items-center gap-2">
-                      <div
-                        className="w-3 h-3 rounded-full"
-                        style={{ backgroundColor: color }}
-                      ></div>
-                      <span className="text-sm font-medium" style={{ color }}>
-                        {name} {elementNames[element]}
-                      </span>
+            <div className="grid grid-cols-5 gap-2">
+              {Object.entries(data.elementBalance).map(([element, count]) => {
+                const color = elementColors[element];
+                const emoji = elementEmojis[element];
+                const maxValue = Math.max(...Object.values(data.elementBalance!));
+                return (
+                  <div key={element} className="text-center">
+                    <div className="text-2xl mb-1">{emoji}</div>
+                    <div className="text-xs font-medium mb-1" style={{ color }}>
+                      {element.charAt(0).toUpperCase() + element.slice(1)}
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-muted-foreground">
-                        {count}个 ({((count / (Object.values(data.elementBalance!).reduce((a, b) => a + b, 0))) * 100).toFixed(0)}%)
-                      </span>
-                    </div>
-                  </div>
-                  <div className="h-3 bg-muted/50 rounded-full overflow-hidden relative">
                     <div
-                      className="h-full rounded-full transition-all duration-1000 ease-out"
+                      className="h-16 rounded-md flex items-end justify-center text-white font-bold text-sm"
                       style={{
-                        width: `${(count / maxValue) * 100}%`,
                         backgroundColor: color,
+                        opacity: 0.3 + (count / maxValue) * 0.7,
                       }}
-                    />
+                    >
+                      <span className="pb-2">{count}</span>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
-
-        {/* Five Elements Relationship Explanation */}
-        <div className="bg-accent/5 rounded-lg p-4 border border-accent/20">
-          <h4 className="text-sm font-semibold text-accent mb-2">五行相生相克</h4>
-          <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
-            <div>
-              <span className="font-medium text-foreground">相生：</span>
-              木生火、火生土、土生金、金生水、水生木
-            </div>
-            <div>
-              <span className="font-medium text-foreground">相克：</span>
-              木克土、土克水、水克火、火克金、金克木
-            </div>
-          </div>
-        </div>
       </Card>
     </TooltipProvider>
   );
