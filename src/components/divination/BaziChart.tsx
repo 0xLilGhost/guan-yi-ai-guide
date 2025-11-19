@@ -49,6 +49,10 @@ export const BaziChart = ({ data }: { data: BaziData }) => {
   const maxValue = data.elementBalance 
     ? Math.max(...Object.values(data.elementBalance))
     : 0;
+  
+  const totalValue = data.elementBalance
+    ? Object.values(data.elementBalance).reduce((sum, val) => sum + val, 0)
+    : 0;
 
   return (
     <TooltipProvider>
@@ -128,25 +132,28 @@ export const BaziChart = ({ data }: { data: BaziData }) => {
               <TooltipContent>五行（金木水火土）在八字中的强弱分布</TooltipContent>
             </Tooltip>
             <div className="space-y-2">
-              {Object.entries(data.elementBalance).map(([element, value]) => (
-                <div key={element}>
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm font-medium" style={{ color: elementColors[element] }}>
-                      {elementNames[element]}
-                    </span>
-                    <span className="text-xs text-muted-foreground">{value}</span>
+              {Object.entries(data.elementBalance).map(([element, value]) => {
+                const percentage = totalValue > 0 ? ((value / totalValue) * 100).toFixed(1) : '0.0';
+                return (
+                  <div key={element}>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-sm font-medium" style={{ color: elementColors[element] }}>
+                        {elementNames[element]}
+                      </span>
+                      <span className="text-xs text-muted-foreground">{percentage}%</span>
+                    </div>
+                    <div className="h-2 bg-muted rounded-full overflow-hidden">
+                      <div 
+                        className="h-full rounded-full transition-all duration-1000 ease-out"
+                        style={{ 
+                          width: `${percentage}%`,
+                          backgroundColor: elementColors[element]
+                        }}
+                      />
+                    </div>
                   </div>
-                  <div className="h-2 bg-muted rounded-full overflow-hidden">
-                    <div 
-                      className="h-full rounded-full transition-all duration-1000 ease-out"
-                      style={{ 
-                        width: `${(value / maxValue) * 100}%`,
-                        backgroundColor: elementColors[element]
-                      }}
-                    />
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
