@@ -19,6 +19,7 @@ interface DivinationRequest {
     number1?: number;
     number2?: number;
   };
+  language?: string;
 }
 
 Deno.serve(async (req) => {
@@ -27,7 +28,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { category, question, birthData, divineData }: DivinationRequest = await req.json();
+    const { category, question, birthData, divineData, language }: DivinationRequest = await req.json();
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
 
     if (!LOVABLE_API_KEY) {
@@ -35,6 +36,122 @@ Deno.serve(async (req) => {
     }
 
     console.log('Divination request:', { category, question, hasBirthData: !!birthData.year, divineMethod: divineData?.method });
+
+    // Traditional Bazi calculation implementation
+    const calculateBaziTraditional = () => {
+      if (!birthData.year || !birthData.month || !birthData.day) {
+        return null;
+      }
+
+      try {
+        const year = parseInt(birthData.year);
+        const month = parseInt(birthData.month);
+        const day = parseInt(birthData.day);
+        const hour = birthData.hour ? parseInt(birthData.hour) : 12;
+
+        // Heavenly Stems (天干)
+        const heavenlyStems = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
+        // Earthly Branches (地支)
+        const earthlyBranches = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
+        
+        // Calculate Year Pillar (年柱) - simplified using year mod
+        const yearStemIndex = (year - 4) % 10;
+        const yearBranchIndex = (year - 4) % 12;
+        
+        // Calculate Month Pillar (月柱) - simplified
+        const monthStemIndex = (yearStemIndex * 2 + month) % 10;
+        const monthBranchIndex = (month + 1) % 12;
+        
+        // Calculate Day Pillar (日柱) - using Julian day number approximation
+        const baseDate = new Date(1900, 0, 1);
+        const currentDate = new Date(year, month - 1, day);
+        const daysDiff = Math.floor((currentDate.getTime() - baseDate.getTime()) / (1000 * 60 * 60 * 24));
+        const dayStemIndex = (daysDiff + 6) % 10;
+        const dayBranchIndex = (daysDiff + 8) % 12;
+        
+        // Calculate Hour Pillar (时柱)
+        const hourBranchIndex = Math.floor((hour + 1) / 2) % 12;
+        const hourStemIndex = (dayStemIndex * 2 + hourBranchIndex) % 10;
+
+        // Get element for each stem
+        const getElement = (stem: string): string => {
+          const stemElements: Record<string, string> = {
+            '甲': 'Wood', '乙': 'Wood',
+            '丙': 'Fire', '丁': 'Fire',
+            '戊': 'Earth', '己': 'Earth',
+            '庚': 'Metal', '辛': 'Metal',
+            '壬': 'Water', '癸': 'Water'
+          };
+          return stemElements[stem] || 'Earth';
+        };
+
+        // Get element for branches (main Qi)
+        const getBranchElement = (branch: string): string => {
+          const branchElements: Record<string, string> = {
+            '子': 'Water', '丑': 'Earth', '寅': 'Wood', '卯': 'Wood',
+            '辰': 'Earth', '巳': 'Fire', '午': 'Fire', '未': 'Earth',
+            '申': 'Metal', '酉': 'Metal', '戌': 'Earth', '亥': 'Water'
+          };
+          return branchElements[branch] || 'Earth';
+        };
+
+        const yearStem = heavenlyStems[yearStemIndex];
+        const yearBranch = earthlyBranches[yearBranchIndex];
+        const monthStem = heavenlyStems[monthStemIndex];
+        const monthBranch = earthlyBranches[monthBranchIndex];
+        const dayStem = heavenlyStems[dayStemIndex];
+        const dayBranch = earthlyBranches[dayBranchIndex];
+        const hourStem = heavenlyStems[hourStemIndex];
+        const hourBranch = earthlyBranches[hourBranchIndex];
+
+        // Count elements for balance
+        const elementBalance = { wood: 0, fire: 0, earth: 0, metal: 0, water: 0 };
+        
+        const addElement = (element: string) => {
+          const key = element.toLowerCase() as keyof typeof elementBalance;
+          if (key in elementBalance) {
+            elementBalance[key]++;
+          }
+        };
+
+        addElement(getElement(yearStem));
+        addElement(getBranchElement(yearBranch));
+        addElement(getElement(monthStem));
+        addElement(getBranchElement(monthBranch));
+        addElement(getElement(dayStem));
+        addElement(getBranchElement(dayBranch));
+        addElement(getElement(hourStem));
+        addElement(getBranchElement(hourBranch));
+
+        return {
+          year: {
+            heavenlyStem: yearStem,
+            earthlyBranch: yearBranch,
+            element: getElement(yearStem)
+          },
+          month: {
+            heavenlyStem: monthStem,
+            earthlyBranch: monthBranch,
+            element: getElement(monthStem)
+          },
+          day: {
+            heavenlyStem: dayStem,
+            earthlyBranch: dayBranch,
+            element: getElement(dayStem)
+          },
+          hour: {
+            heavenlyStem: hourStem,
+            earthlyBranch: hourBranch,
+            element: getElement(hourStem)
+          },
+          dayMaster: dayStem,
+          elementBalance
+        };
+      } catch (error) {
+        console.error('Bazi calculation error:', error);
+        return null;
+      }
+    };
 
     // 计算真实的梅花易数卦象
     const calculateHexagram = () => {
@@ -101,8 +218,10 @@ Deno.serve(async (req) => {
       };
     };
 
+
     const hexagramData = (category === '梅花易数' || category === '综合占卜') ? calculateHexagram() : null;
     const qimenData = (category === '奇门遁甲' || category === '综合占卜') && birthData.day ? calculateQimen() : null;
+    const baziData = calculateBaziTraditional();
 
     // Build system prompt based on category
     const systemPrompts = {
@@ -165,7 +284,10 @@ Deno.serve(async (req) => {
       userPrompt += `（用户未提供生辰信息，请基于问题本身和通用规律进行分析）\n\n`;
     }
 
-    // 如果有真实计算的卦象和奇门数据，加入到用户提示中
+    // 如果有真实计算的卦象、八字和奇门数据，加入到用户提示中
+    if (baziData) {
+      userPrompt += `\n真实八字排盘：\n- 年柱：${baziData.year.heavenlyStem}${baziData.year.earthlyBranch}（${baziData.year.element}）\n- 月柱：${baziData.month.heavenlyStem}${baziData.month.earthlyBranch}（${baziData.month.element}）\n- 日柱：${baziData.day.heavenlyStem}${baziData.day.earthlyBranch}（${baziData.day.element}）\n- 时柱：${baziData.hour.heavenlyStem}${baziData.hour.earthlyBranch}（${baziData.hour.element}）\n- 日主：${baziData.dayMaster}\n- 五行分布：木${baziData.elementBalance.wood} 火${baziData.elementBalance.fire} 土${baziData.elementBalance.earth} 金${baziData.elementBalance.metal} 水${baziData.elementBalance.water}\n请基于此八字进行解读。\n`;
+    }
     if (hexagramData) {
       userPrompt += `\n真实卦象数据：\n- 本卦：${hexagramData.upper}上${hexagramData.lower}下\n- 变爻：第${hexagramData.changing}爻\n- 变卦：${hexagramData.result}\n请基于此卦象进行解读。\n`;
     }
@@ -185,14 +307,7 @@ Deno.serve(async (req) => {
   ],
   "probability": "准确度评估（如：参考度 75-80%）",
   "visualData": {
-    "bazi": ${birthData.year && birthData.month && birthData.day ? `{
-      "year": { "heavenlyStem": "年干", "earthlyBranch": "年支", "element": "年柱五行" },
-      "month": { "heavenlyStem": "月干", "earthlyBranch": "月支", "element": "月柱五行" },
-      "day": { "heavenlyStem": "日干", "earthlyBranch": "日支", "element": "日柱五行" },
-      "hour": { "heavenlyStem": "时干", "earthlyBranch": "时支", "element": "时柱五行" },
-      "dayMaster": "日主五行",
-      "elementBalance": { "wood": 数值, "fire": 数值, "earth": 数值, "metal": 数值, "water": 数值 }
-    }` : 'null'},
+    "bazi": ${baziData ? JSON.stringify(baziData) : 'null'},
     "hexagram": ${hexagramData ? JSON.stringify(hexagramData) : 'null'},
     "qimen": ${qimenData ? JSON.stringify(qimenData) : 'null'},
     "ziwei": ${(category === '情感婚姻' || category === '事业运势' || category === '综合占卜') && birthData.year ? `{
