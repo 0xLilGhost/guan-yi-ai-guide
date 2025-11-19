@@ -295,6 +295,15 @@ Deno.serve(async (req) => {
       userPrompt += `\n真实奇门盘局：\n- 宫位：${qimenData.palace}\n- 值使门：${qimenData.gate}\n- 值符星：${qimenData.star}\n- 吉方：${qimenData.direction}\n请基于此盘局进行解读。\n`;
     }
 
+    // Build visualData for AI response
+    const visualDataInstruction = {
+      bazi: baziData,
+      hexagram: hexagramData,
+      qimen: qimenData,
+      ziwei: (category === '情感婚姻' || category === '事业运势' || category === '综合占卜') && birthData.year ? 'generate' : null,
+      fengshui: (category === '风水布局' || category === '综合占卜') ? 'generate' : null
+    };
+
     userPrompt += `请按以下结构输出结果（使用JSON格式）：
 {
   "overview": "总体运势概述（2-3句话）",
@@ -307,28 +316,11 @@ Deno.serve(async (req) => {
   ],
   "probability": "准确度评估（如：参考度 75-80%）",
   "visualData": {
-    "bazi": ${baziData ? JSON.stringify(baziData) : 'null'},
-    "hexagram": ${hexagramData ? JSON.stringify(hexagramData) : 'null'},
-    "qimen": ${qimenData ? JSON.stringify(qimenData) : 'null'},
-    "ziwei": ${(category === '情感婚姻' || category === '事业运势' || category === '综合占卜') && birthData.year ? `{
-      "mainStar": "主星（紫微/天机/太阳/武曲/天同/廉贞等）",
-      "palace": "命宫位置",
-      "keyPalaces": {
-        "career": "官禄宫主星及吉凶",
-        "wealth": "财帛宫主星及吉凶",
-        "relationship": "夫妻宫主星及吉凶",
-        "health": "疾厄宫主星及吉凶"
-      }
-    }` : 'null'},
-    "fengshui": ${category === '风水布局' || category === '综合占卜' ? `{
-      "favorableDirection": ["东方", "南方"],
-      "unfavorableDirection": ["西北方"],
-      "suggestions": {
-        "color": "建议颜色（如：青色、绿色）",
-        "element": "补充五行（如：木、火）",
-        "placement": "重要摆设建议（100字以内）"
-      }
-    }` : 'null'}
+    "bazi": ${baziData ? '已提供真实数据' : 'null'},
+    "hexagram": ${hexagramData ? '已提供真实数据' : 'null'},
+    "qimen": ${qimenData ? '已提供真实数据' : 'null'},
+    "ziwei": ${visualDataInstruction.ziwei === 'generate' ? '{"mainStar":"主星名称","palace":"命宫位置","keyPalaces":{"career":"官禄宫信息","wealth":"财帛宫信息","relationship":"夫妻宫信息","health":"疾厄宫信息"}}' : 'null'},
+    "fengshui": ${visualDataInstruction.fengshui === 'generate' ? '{"favorableDirection":["吉方1","吉方2"],"unfavorableDirection":["凶方"],"suggestions":{"color":"颜色建议","element":"五行建议","placement":"摆设建议"}}' : 'null'}
   }
 }
 
@@ -338,7 +330,7 @@ Deno.serve(async (req) => {
 3. 解释清楚推演过程，让用户理解逻辑
 4. 语言要专业但易懂，避免过于玄虚
 5. 必须返回有效的JSON格式
-6. visualData中根据类别和生辰信息生成真实的术数推演数据，如果无法生成则对应项设为null`;
+6. visualData中，已提供真实数据的项目直接标注"已提供真实数据"，需要生成的项目按示例格式填写`;
 
     // Call AI
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
@@ -375,6 +367,13 @@ Deno.serve(async (req) => {
       const jsonMatch = aiMessage.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         result = JSON.parse(jsonMatch[0]);
+        
+        // Inject real calculated data
+        if (result.visualData) {
+          if (baziData) result.visualData.bazi = baziData;
+          if (hexagramData) result.visualData.hexagram = hexagramData;
+          if (qimenData) result.visualData.qimen = qimenData;
+        }
       } else {
         // If no JSON found, create structured response from text
         result = {
