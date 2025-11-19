@@ -11,10 +11,6 @@ const Footer = () => {
           {/* Tagline */}
           <p className="text-muted-foreground max-w-md">
             古老智慧与现代科技的完美融合
-            <br />
-            <span className="text-sm opacity-70">
-              The Perfect Blend of Ancient Wisdom and Modern Technology
-            </span>
           </p>
 
           {/* Divider */}
