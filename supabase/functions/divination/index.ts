@@ -1,3 +1,9 @@
+import lunisolar from 'npm:lunisolar@2.6.0';
+import char8ex from 'npm:lunisolar@2.6.0/plugins/char8ex';
+
+// 加载八字插件
+lunisolar.extend(char8ex);
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -75,71 +81,70 @@ Deno.serve(async (req) => {
       };
     };
 
-    // 计算真实八字 (使用简化算法)
+    // 使用lunisolar库计算真实八字
     const calculateBazi = () => {
       if (!birthData.year || !birthData.month || !birthData.day) {
         return null;
       }
 
       try {
-        // 天干：甲乙丙丁戊己庚辛壬癸
-        const heavenlyStems = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
-        // 地支：子丑寅卯辰巳午未申酉戌亥
-        const earthlyBranches = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
+        const year = parseInt(birthData.year);
+        const month = parseInt(birthData.month);
+        const day = parseInt(birthData.day);
+        const hour = birthData.hour ? parseInt(birthData.hour) : 12;
+        const minute = birthData.minute ? parseInt(birthData.minute) : 0;
         
-        // 天干五行: 甲乙木、丙丁火、戊己土、庚辛金、壬癸水
-        const stemElements: Record<string, string> = {
+        // 性别：1为男，0为女
+        const gender = birthData.gender === 'male' ? 1 : 0;
+        
+        // 创建lunisolar日期时间
+        const dateStr = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')} ${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+        console.log('Creating bazi for date:', dateStr);
+        
+        const lsr = lunisolar(dateStr);
+        const c8 = lsr.char8ex(gender);
+        
+        console.log('Bazi calculated:', c8.toString());
+        
+        // 天干地支五行映射
+        const stemElementMap: Record<string, string> = {
           '甲': 'Wood', '乙': 'Wood',
           '丙': 'Fire', '丁': 'Fire',
           '戊': 'Earth', '己': 'Earth',
           '庚': 'Metal', '辛': 'Metal',
           '壬': 'Water', '癸': 'Water'
         };
-
-        // 地支五行
-        const branchElements: Record<string, string> = {
+        
+        const branchElementMap: Record<string, string> = {
           '寅': 'Wood', '卯': 'Wood',
           '巳': 'Fire', '午': 'Fire',
           '辰': 'Earth', '戌': 'Earth', '丑': 'Earth', '未': 'Earth',
           '申': 'Metal', '酉': 'Metal',
           '子': 'Water', '亥': 'Water'
         };
-
-        const year = parseInt(birthData.year);
-        const month = parseInt(birthData.month);
-        const day = parseInt(birthData.day);
-        const hour = birthData.hour ? parseInt(birthData.hour) : 12;
-
-        // 年柱计算 (简化: 基于公元年份)
-        const yearStemIndex = (year - 4) % 10; // 甲子年为公元4年
-        const yearBranchIndex = (year - 4) % 12;
-        const yearStem = heavenlyStems[yearStemIndex];
-        const yearBranch = earthlyBranches[yearBranchIndex];
-
-        // 月柱计算 (简化: 基于月份和年干)
-        const monthOffset = (yearStemIndex % 5) * 2; // 年干影响月干的起点
-        const monthStemIndex = (monthOffset + month * 2 - 2) % 10;
-        const monthBranchIndex = (month + 1) % 12; // 寅月为正月
-        const monthStem = heavenlyStems[monthStemIndex];
-        const monthBranch = earthlyBranches[monthBranchIndex];
-
-        // 日柱计算 (简化: 使用公式近似推算)
-        // 这是一个简化的算法，实际八字需要考虑节气等因素
-        const baseDay = new Date(1900, 0, 1).getTime();
-        const currentDay = new Date(year, month - 1, day).getTime();
-        const daysPassed = Math.floor((currentDay - baseDay) / (1000 * 60 * 60 * 24));
-        const dayStemIndex = (daysPassed + 6) % 10; // 1900年1月1日为丙寅日
-        const dayBranchIndex = (daysPassed + 8) % 12;
-        const dayStem = heavenlyStems[dayStemIndex];
-        const dayBranch = earthlyBranches[dayBranchIndex];
-
-        // 时柱计算 (基于时辰和日干)
-        const hourBranchIndex = Math.floor((hour + 1) / 2) % 12; // 23-1时为子时
-        const hourOffset = (dayStemIndex % 5) * 2; // 日干影响时干
-        const hourStemIndex = (hourOffset + hourBranchIndex * 2) % 10;
-        const hourStem = heavenlyStems[hourStemIndex];
-        const hourBranch = earthlyBranches[hourBranchIndex];
-
+        
+        // 获取各柱数据
+        const yearPillar = c8.year;
+        const monthPillar = c8.month;
+        const dayPillar = c8.day;
+        const hourPillar = c8.hour;
+        
+        // 获取天干地支
+        const yearStem = yearPillar.stem.name;
+        const yearBranch = yearPillar.branch.name;
+        const monthStem = monthPillar.stem.name;
+        const monthBranch = monthPillar.branch.name;
+        const dayStem = dayPillar.stem.name;
+        const dayBranch = dayPillar.branch.name;
+        const hourStem = hourPillar.stem.name;
+        const hourBranch = hourPillar.branch.name;
+        
+        // 获取五行
+        const yearElement = stemElementMap[yearStem] || 'Earth';
+        const monthElement = stemElementMap[monthStem] || 'Earth';
+        const dayElement = stemElementMap[dayStem] || 'Earth';
+        const hourElement = stemElementMap[hourStem] || 'Earth';
+        
         // 计算五行平衡
         const elementBalance = {
           wood: 0,
@@ -148,43 +153,44 @@ Deno.serve(async (req) => {
           metal: 0,
           water: 0
         };
-
-        // 统计四柱天干地支的五行
-        const allStems = [yearStem, monthStem, dayStem, hourStem];
-        const allBranches = [yearBranch, monthBranch, dayBranch, hourBranch];
-
-        allStems.forEach(stem => {
-          const element = stemElements[stem].toLowerCase() as keyof typeof elementBalance;
-          if (element in elementBalance) elementBalance[element]++;
+        
+        // 统计天干五行
+        [yearElement, monthElement, dayElement, hourElement].forEach(element => {
+          const key = element.toLowerCase() as keyof typeof elementBalance;
+          if (key in elementBalance) elementBalance[key]++;
         });
-
-        allBranches.forEach(branch => {
-          const element = branchElements[branch].toLowerCase() as keyof typeof elementBalance;
-          if (element in elementBalance) elementBalance[element]++;
+        
+        // 统计地支五行
+        [yearBranch, monthBranch, dayBranch, hourBranch].forEach(branch => {
+          const element = branchElementMap[branch];
+          if (element) {
+            const key = element.toLowerCase() as keyof typeof elementBalance;
+            if (key in elementBalance) elementBalance[key]++;
+          }
         });
-
-        const dayMaster = stemElements[dayStem];
-
+        
+        const dayMaster = dayElement;
+        
         return {
           year: {
             heavenlyStem: yearStem,
             earthlyBranch: yearBranch,
-            element: stemElements[yearStem]
+            element: yearElement
           },
           month: {
             heavenlyStem: monthStem,
             earthlyBranch: monthBranch,
-            element: stemElements[monthStem]
+            element: monthElement
           },
           day: {
             heavenlyStem: dayStem,
             earthlyBranch: dayBranch,
-            element: stemElements[dayStem]
+            element: dayElement
           },
           hour: {
             heavenlyStem: hourStem,
             earthlyBranch: hourBranch,
-            element: stemElements[hourStem]
+            element: hourElement
           },
           dayMaster: dayMaster,
           elementBalance: elementBalance
