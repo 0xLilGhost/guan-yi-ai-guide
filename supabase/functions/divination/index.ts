@@ -1,8 +1,4 @@
 import lunisolar from 'npm:lunisolar@2.6.0';
-import char8ex from 'npm:lunisolar@2.6.0/plugins/char8ex';
-
-// 加载八字插件
-lunisolar.extend(char8ex);
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -102,7 +98,7 @@ Deno.serve(async (req) => {
         console.log('Creating bazi for date:', dateStr);
         
         const lsr = lunisolar(dateStr);
-        const c8 = lsr.char8ex(gender);
+        const c8 = lsr.char8;
         
         console.log('Bazi calculated:', c8.toString());
         
